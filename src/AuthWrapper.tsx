@@ -4,7 +4,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 
 type AuthWrapperProps = {
-  children?: React.ReactNode;
+  children?: React.ReactNode; // optional, weil Login-Seite auch ohne geht
 };
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
@@ -12,27 +12,26 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initial Session laden
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
     });
 
-    // Listener für Login/Logout
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-      }
-    );
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
     return () => {
-      subscription.subscription.unsubscribe();
+      listener.subscription.unsubscribe();
     };
   }, []);
 
-  if (loading) return <div style={{ padding: 20 }}>⏳ Lade...</div>;
+  if (loading) {
+    return <div style={{ padding: 20 }}>⏳ Lade...</div>;
+  }
 
   if (!session) {
+    // Kein Login → Supabase Auth UI anzeigen
     return (
       <div style={{ maxWidth: 400, margin: "50px auto" }}>
         <h2>Login</h2>
@@ -41,10 +40,16 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
+  // Eingeloggt → wenn Kinder übergeben, diese anzeigen
+  if (children) {
+    return <>{children}</>;
+  }
+
+  // Eingeloggt, aber keine Kinder (z. B. auf /login)
   return (
     <div style={{ padding: 20 }}>
-      ✅ Eingeloggt!
-      {children}
+      ✅ Erfolgreich eingeloggt! <br />
+      Gehe zu <a href="/dataform"><b>/dataform</b></a>
     </div>
   );
-}
+  }
