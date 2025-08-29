@@ -1,237 +1,379 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { usePlans } from "@/hooks/usePlans";
-import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
 
 export function PlanManager() {
-  const {
-    userId,
-    months,
-    weeks,
-    days,
-    loading,
-    currentMonthYear,
-    currentWeek,
-    today,
-    currentMonthPlan,
-    currentWeekPlan,
-    currentDayPlan,
-  } = usePlans();
+  const navigate = useNavigate();
 
-  if (loading) return <div className="p-6">⏳ Lade Plan-Status...</div>;
+  const [monthPlans, setMonthPlans] = useState<any[]>([]);
+  const [weekPlans, setWeekPlans] = useState<any[]>([]);
+  const [dayPlans, setDayPlans] = useState<any[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // --- Aktionen ---
-  const handleCreateMonthPlan = async () => {
-    if (!userId) return;
-    await supabase.from("month_plans").insert([
-      {
-        user_id: userId,
-        month_year: currentMonthYear,
-        ziele: "Dummy-Ziel: Spieler entwickeln",
-        schwerpunkte: "Dummy-Schwerpunkt: Technik & Ballbesitz",
-      },
-    ]);
-    window.location.reload();
+  // Für neuen Monatsplan
+  const [newMonthYear, setNewMonthYear] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // Für Wochenplanung
+  const [selectedWeek, setSelectedWeek] = useState<any | null>(null);
+  const [tageProWoche, setTageProWoche] = useState<number>(3);
+  const [einheitDauer, setEinheitDauer] = useState<number>(90);
+  const [spielerkader, setSpielerkader] = useState<number>(18);
+  const [torhueter, setTorhueter] = useState<number>(2);
+  const [weekStartDate, setWeekStartDate] = useState<string>("");
+  const [weekMessage, setWeekMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPlans = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      setUserId(userData.user.id);
+
+      const { data: months } = await supabase
+        .from("month_plans")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .order("month_year", { ascending: true });
+
+      const { data: weeks } = await supabase
+        .from("week_plans")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .order("calendar_week", { ascending: true });
+
+      const { data: days } = await supabase
+        .from("day_plans")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .order("training_date", { ascending: true });
+
+      setMonthPlans(months || []);
+      setWeekPlans(weeks || []);
+      setDayPlans(days || []);
+    };
+
+    loadPlans();
+  }, []);
+
+  // 1. Neuer Monatsplan
+  const createMonthPlan = async () => {
+    if (!userId || !newMonthYear) {
+      setMessage("❌ Bitte Monat eingeben (YYYY-MM)");
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    const { data: submission } = await supabase
+      .from("taggy_submissions")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (!submission) {
+      setMessage("❌ Keine Stammdaten gefunden");
+      setLoading(false);
+      return;
+    }
+
+    const payload = {
+      ...submission,
+      plan_typ: "Monat",
+      month_year: newMonthYear,
+    };
+
+    console.log("➡️ Monatsplan Payload", payload);
+
+    try {
+      const response = await fetch("https://hook.eu2.make.com/jr6wvnrr27mc7wr0r73pkstjb2o75z5p", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Fehler beim Senden");
+
+      setMessage("✅ Monatsplan an Make gesendet");
+      setNewMonthYear("");
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Fehler beim Senden");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCreateWeekPlan = async (kw: number = currentWeek) => {
-    if (!userId || months.length === 0) return;
-    await supabase.from("week_plans").insert([
-      {
-        user_id: userId,
-        month_plan_id: months[months.length - 1].id,
-        calendar_week: kw,
-        ziele: "Dummy-Ziel: Umschalten verbessern",
-        schwerpunkte: "Dummy-Schwerpunkt: Pressing & Ballgewinne",
-      },
-    ]);
-    window.location.reload();
+  // 2. Neue Woche für ausgewählten Monat
+  const sendWeekPlan = async () => {
+    if (!selectedWeek || !weekStartDate) {
+      setWeekMessage("❌ Bitte Woche auswählen und Startdatum setzen");
+      return;
+    }
+
+    const payload = {
+      plan_typ: "Woche",
+      week_plan_id: selectedWeek.id,
+      month_plan_id: selectedWeek.month_plan_id,
+      woche_nr: selectedWeek.woche_nr,
+      trainingsziel: selectedWeek.trainingsziel,
+      schwerpunkt1: selectedWeek.schwerpunkt1,
+      schwerpunkt2: selectedWeek.schwerpunkt2,
+      schwerpunkt3: selectedWeek.schwerpunkt3,
+      tage_pro_woche: tageProWoche,
+      einheit_dauer: einheitDauer,
+      spielerkader: spielerkader,
+      torhueter: torhueter,
+      week_start_date: weekStartDate,
+      user_id: userId,
+    };
+
+    console.log("➡️ Wochenplan Payload", payload);
+
+    try {
+      const res = await fetch("https://hook.eu2.make.com/jr6wvnrr27mc7wr0r73pkstjb2o75z5p", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Fehler beim Senden");
+
+      setWeekMessage("✅ Wochenplan an Make gesendet");
+    } catch (err) {
+      console.error(err);
+      setWeekMessage("❌ Fehler beim Senden");
+    }
   };
 
-  const handleCreateDayPlan = async (date: string = today) => {
-    if (!userId || weeks.length === 0) return;
-    await supabase.from("day_plans").insert([
-      {
-        user_id: userId,
-        week_plan_id: weeks[weeks.length - 1].id,
-        training_date: date,
-        abschnitte: { info: "Dummy-Ablauf für Testeinheit" },
-        skizzen: { feld: "Dummy-Spielfeld" },
-      },
-    ]);
-    window.location.reload();
-  };
+  // 3. Neuer Tagesplan
+  const sendDayPlan = async (day: any) => {
+    if (!day || !userId) return;
 
-  const handleDelete = async (table: string, id: string) => {
-    if (!confirm("Wirklich löschen?")) return;
-    await supabase.from(table).delete().eq("id", id);
-    window.location.reload();
+    const payload = {
+      plan_typ: "Tag",
+      day_plan_id: day.id,
+      week_plan_id: day.week_plan_id,
+      training_date: day.training_date,
+      tag_nr: day.tag_nr,
+      trainingsziel: day.trainingsziel,
+      schwerpunkt1: day.schwerpunkt1,
+      schwerpunkt2: day.schwerpunkt2,
+      schwerpunkt3: day.schwerpunkt3,
+      einheit_dauer: einheitDauer,
+      spielerkader: spielerkader,
+      torhueter: torhueter,
+      user_id: userId,
+    };
+
+    console.log("➡️ Tagesplan Payload", payload);
+
+    try {
+      const res = await fetch("https://hook.eu2.make.com/jr6wvnrr27mc7wr0r73pkstjb2o75z5p", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Fehler beim Senden");
+
+      alert("✅ Tagesplan an Make gesendet");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Fehler beim Senden");
+    }
   };
 
   return (
-    <Card className="max-w-3xl mx-auto p-6">
+    <Card className="max-w-4xl mx-auto p-6 space-y-6">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Plan-Manager</CardTitle>
-          <div className="flex gap-2">
-            {currentMonthPlan && (
-              <Link to={`/plans/month/${currentMonthPlan.id}`}>
-                <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                  Aktueller Monat
-                </Button>
-              </Link>
-            )}
-            {currentWeekPlan && (
-              <Link to={`/plans/week/${currentWeekPlan.id}`}>
-                <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                  Aktuelle Woche
-                </Button>
-              </Link>
-            )}
-            {currentDayPlan && (
-              <Link to={`/plans/day/${currentDayPlan.id}`}>
-                <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                  Heute
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
+        <CardTitle>Plan Manager</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-
-        {/* --- Erstellungsleiste --- */}
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex gap-2">
-            <Button onClick={handleCreateMonthPlan} className="bg-green-600 text-white hover:bg-green-700">
-              Neuen Monatsplan anlegen
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => handleCreateWeekPlan(currentWeek)}
-              disabled={months.length === 0}
-              className="bg-green-600 text-white hover:bg-green-700"
-            >
-              Diese Woche anlegen
-            </Button>
-            <Button
-              onClick={() => handleCreateWeekPlan(currentWeek + 1)}
-              disabled={months.length === 0}
-              className="bg-green-600 text-white hover:bg-green-700"
-            >
-              Nächste Woche anlegen
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => handleCreateDayPlan(today)}
-              disabled={weeks.length === 0}
-              className="bg-green-600 text-white hover:bg-green-700"
-            >
-              Heute anlegen
-            </Button>
-            <Button
-              onClick={() => {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                handleCreateDayPlan(tomorrow.toISOString().split("T")[0]);
-              }}
-              disabled={weeks.length === 0}
-              className="bg-green-600 text-white hover:bg-green-700"
-            >
-              Nächster Tag anlegen
-            </Button>
-          </div>
-        </div>
-
+      <CardContent className="space-y-8">
         {/* Monatspläne */}
         <div>
-          <span className="font-semibold">Monatspläne</span>
-          <ul className="space-y-2 mt-2">
-            {months.map((m) => (
-              <li
-                key={m.id}
-                className={`flex justify-between items-center p-2 rounded ${
-                  m.month_year === currentMonthYear ? "bg-green-600 text-white" : ""
-                }`}
-              >
-                <span>{m.month_year} – {m.ziele}</span>
-                <div className="flex gap-2">
-                  <Link to={`/plans/month/${m.id}`}>
-                    <Button size="sm" className="bg-blue-500 text-white hover:bg-blue-600">
-                      Öffnen
-                    </Button>
-                  </Link>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete("month_plans", m.id)}
-                  >
-                    Löschen
-                  </Button>
-                </div>
+          <h3 className="font-bold text-lg mb-2">Monatspläne</h3>
+          <ul className="space-y-2">
+            {monthPlans.map((p) => (
+              <li key={p.id} className="flex justify-between">
+                <span>{p.month_year}</span>
+                <Button
+                  onClick={() => navigate(`/plans/month/${p.id}`)}
+                  className="bg-blue-600 text-white"
+                >
+                  Öffnen
+                </Button>
               </li>
             ))}
           </ul>
+
+          <div className="mt-4 flex gap-2 items-center">
+            <Input
+              placeholder="YYYY-MM"
+              value={newMonthYear}
+              onChange={(e) => setNewMonthYear(e.target.value)}
+            />
+            <Button
+              onClick={createMonthPlan}
+              disabled={loading}
+              className="bg-green-600 text-white"
+            >
+              {loading ? "Sende..." : "Neuen Monat anlegen"}
+            </Button>
+          </div>
+          {message && <p className="mt-2">{message}</p>}
         </div>
 
         {/* Wochenpläne */}
         <div>
-          <span className="font-semibold">Wochenpläne</span>
-          <ul className="space-y-2 mt-2">
-            {weeks.map((w) => (
+          <h3 className="font-bold text-lg mb-2">Wochenpläne</h3>
+          <ul className="space-y-2">
+            {weekPlans.map((p) => (
               <li
-                key={w.id}
-                className={`flex justify-between items-center p-2 rounded ${
-                  w.calendar_week === currentWeek ? "bg-green-600 text-white" : ""
-                }`}
+                key={p.id}
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setSelectedWeek(p)}
               >
-                <span>KW {w.calendar_week} – {w.ziele}</span>
-                <div className="flex gap-2">
-                  <Link to={`/plans/week/${w.id}`}>
-                    <Button size="sm" className="bg-blue-500 text-white hover:bg-blue-600">
-                      Öffnen
-                    </Button>
-                  </Link>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete("week_plans", w.id)}
-                  >
-                    Löschen
-                  </Button>
-                </div>
+                <span>
+                  KW {p.calendar_week} – {p.trainingsziel?.slice(0, 40)}...
+                </span>
+                <Button
+                  onClick={() => navigate(`/plans/week/${p.id}`)}
+                  className="bg-blue-600 text-white"
+                >
+                  Öffnen
+                </Button>
               </li>
             ))}
           </ul>
+
+          {selectedWeek && (
+            <div className="mt-6 p-4 border rounded">
+              <h4 className="font-bold mb-2">
+                Planung für Woche {selectedWeek.woche_nr}
+              </h4>
+
+              <label className="block mt-2 font-semibold">Trainingsziel</label>
+              <Input
+                value={selectedWeek.trainingsziel || ""}
+                onChange={(e) =>
+                  setSelectedWeek({
+                    ...selectedWeek,
+                    trainingsziel: e.target.value,
+                  })
+                }
+              />
+
+              <label className="block mt-2 font-semibold">Schwerpunkt 1</label>
+              <Input
+                value={selectedWeek.schwerpunkt1 || ""}
+                onChange={(e) =>
+                  setSelectedWeek({
+                    ...selectedWeek,
+                    schwerpunkt1: e.target.value,
+                  })
+                }
+              />
+
+              <label className="block mt-2 font-semibold">Schwerpunkt 2</label>
+              <Input
+                value={selectedWeek.schwerpunkt2 || ""}
+                onChange={(e) =>
+                  setSelectedWeek({
+                    ...selectedWeek,
+                    schwerpunkt2: e.target.value,
+                  })
+                }
+              />
+
+              <label className="block mt-2 font-semibold">Schwerpunkt 3</label>
+              <Input
+                value={selectedWeek.schwerpunkt3 || ""}
+                onChange={(e) =>
+                  setSelectedWeek({
+                    ...selectedWeek,
+                    schwerpunkt3: e.target.value,
+                  })
+                }
+              />
+
+              <label className="block mt-2 font-semibold">
+                Startdatum der Woche (Montag)
+              </label>
+              <Input
+                type="date"
+                value={weekStartDate}
+                onChange={(e) => setWeekStartDate(e.target.value)}
+              />
+
+              <label className="block mt-2 font-semibold">
+                Trainingstage pro Woche
+              </label>
+              <Input
+                type="number"
+                value={tageProWoche}
+                onChange={(e) => setTageProWoche(parseInt(e.target.value))}
+              />
+
+              <label className="block mt-2 font-semibold">
+                Einheitdauer (Minuten)
+              </label>
+              <Input
+                type="number"
+                value={einheitDauer}
+                onChange={(e) => setEinheitDauer(parseInt(e.target.value))}
+              />
+
+              <label className="block mt-2 font-semibold">Spielerkader</label>
+              <Input
+                type="number"
+                value={spielerkader}
+                onChange={(e) => setSpielerkader(parseInt(e.target.value))}
+              />
+
+              <label className="block mt-2 font-semibold">Torhüter</label>
+              <Input
+                type="number"
+                value={torhueter}
+                onChange={(e) => setTorhueter(parseInt(e.target.value))}
+              />
+
+              <Button
+                onClick={sendWeekPlan}
+                className="bg-green-600 text-white mt-4"
+              >
+                Wochenplan an Make senden
+              </Button>
+              {weekMessage && <p className="mt-2">{weekMessage}</p>}
+            </div>
+          )}
         </div>
 
         {/* Tagespläne */}
         <div>
-          <span className="font-semibold">Tagespläne</span>
-          <ul className="space-y-2 mt-2">
-            {days.map((d) => (
-              <li
-                key={d.id}
-                className={`flex justify-between items-center p-2 rounded ${
-                  d.training_date === today ? "bg-green-600 text-white" : ""
-                }`}
-              >
-                <span>{d.training_date} – {d.abschnitte?.info}</span>
+          <h3 className="font-bold text-lg mb-2">Tagespläne</h3>
+          <ul className="space-y-2">
+            {dayPlans.map((p) => (
+              <li key={p.id} className="flex justify-between items-center">
+                <span>
+                  {p.training_date} – Ziel: {p.trainingsziel?.slice(0, 30)}...
+                </span>
                 <div className="flex gap-2">
-                  <Link to={`/plans/day/${d.id}`}>
-                    <Button size="sm" className="bg-blue-500 text-white hover:bg-blue-600">
-                      Öffnen
-                    </Button>
-                  </Link>
                   <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete("day_plans", d.id)}
+                    onClick={() => navigate(`/plans/day/${p.id}`)}
+                    className="bg-blue-600 text-white"
                   >
-                    Löschen
+                    Öffnen
+                  </Button>
+                  <Button
+                    onClick={() => sendDayPlan(p)}
+                    className="bg-green-600 text-white"
+                  >
+                    Tagesplan senden
                   </Button>
                 </div>
               </li>
@@ -242,3 +384,4 @@ export function PlanManager() {
     </Card>
   );
 }
+
