@@ -19,18 +19,19 @@ export function TrainingForm() {
 
   const [form, setForm] = useState<any>({
     altersstufe: "",
-    spieleranzahl: "",
+    spielerkader: "",
     torhueter: "",
-    einheiten_pro_woche: "",
+    tage_pro_woche: "",
     einheit_dauer: "",
     plan_typ: "",
+    saisonphase: "", // neu
     saisonziel: "",
     spielidee: "",
     match_formation: "",
-    entwicklungsschwerpunkte: "",
-    philosophie: "",
-    ziel_konkret: "",
-    platz_material: "",
+    fokus: "",
+    trainingsphilosophie: "",
+    schwachstellen: "",
+    platz: "",
     notizen: "",
   });
 
@@ -50,18 +51,19 @@ export function TrainingForm() {
         if (!error && submission) {
           setForm({
             altersstufe: submission.altersstufe ?? "",
-            spieleranzahl: submission.spieleranzahl ?? "",
+            spielerkader: submission.spielerkader ?? "",
             torhueter: submission.torhueter ?? "",
-            einheiten_pro_woche: submission.einheiten_pro_woche ?? "",
+            tage_pro_woche: submission.tage_pro_woche ?? "",
             einheit_dauer: submission.einheit_dauer ?? "",
             plan_typ: submission.plan_typ ?? "",
+            saisonphase: submission.saisonphase ?? "",
             saisonziel: submission.saisonziel ?? "",
             spielidee: submission.spielidee ?? "",
             match_formation: submission.match_formation ?? "",
-            entwicklungsschwerpunkte: submission.entwicklungsschwerpunkte ?? "",
-            philosophie: submission.philosophie ?? "",
-            ziel_konkret: submission.ziel_konkret ?? "",
-            platz_material: submission.platz_material ?? "",
+            fokus: submission.fokus ?? "",
+            trainingsphilosophie: submission.trainingsphilosophie ?? "",
+            schwachstellen: submission.schwachstellen ?? "",
+            platz: submission.platz ?? "",
             notizen: submission.notizen ?? "",
           });
         }
@@ -86,18 +88,19 @@ export function TrainingForm() {
       {
         user_id: userId,
         altersstufe: form.altersstufe,
-        spieleranzahl: form.spieleranzahl ? parseInt(form.spieleranzahl, 10) : null,
+        spielerkader: form.spielerkader ? parseInt(form.spielerkader, 10) : null,
         torhueter: form.torhueter ? parseInt(form.torhueter, 10) : null,
-        einheiten_pro_woche: form.einheiten_pro_woche ? parseInt(form.einheiten_pro_woche, 10) : null,
+        tage_pro_woche: form.tage_pro_woche ? parseInt(form.tage_pro_woche, 10) : null,
         einheit_dauer: form.einheit_dauer ? parseInt(form.einheit_dauer, 10) : null,
         plan_typ: form.plan_typ,
+        saisonphase: form.saisonphase,
         saisonziel: form.saisonziel,
         spielidee: form.spielidee,
         match_formation: form.match_formation,
-        entwicklungsschwerpunkte: form.entwicklungsschwerpunkte,
-        philosophie: form.philosophie,
-        ziel_konkret: form.ziel_konkret,
-        platz_material: form.platz_material,
+        fokus: form.fokus,
+        trainingsphilosophie: form.trainingsphilosophie,
+        schwachstellen: form.schwachstellen,
+        platz: form.platz,
         notizen: form.notizen,
       },
     ]);
@@ -125,11 +128,11 @@ export function TrainingForm() {
           />
         </div>
         <div>
-          <Label>Spieleranzahl</Label>
+          <Label>Kadergröße</Label>
           <Input
             type="number"
-            value={form.spieleranzahl}
-            onChange={(e) => handleChange("spieleranzahl", e.target.value)}
+            value={form.spielerkader}
+            onChange={(e) => handleChange("spielerkader", e.target.value)}
           />
         </div>
         <div>
@@ -144,8 +147,8 @@ export function TrainingForm() {
           <Label>Einheiten pro Woche</Label>
           <Input
             type="number"
-            value={form.einheiten_pro_woche}
-            onChange={(e) => handleChange("einheiten_pro_woche", e.target.value)}
+            value={form.tage_pro_woche}
+            onChange={(e) => handleChange("tage_pro_woche", e.target.value)}
           />
         </div>
         <div>
@@ -166,43 +169,41 @@ export function TrainingForm() {
               <SelectValue placeholder="Wählen..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="trainingstag">Trainingstag</SelectItem>
-              <SelectItem value="wochenplan">Wochenplan</SelectItem>
-              <SelectItem value="monatsplan">Monatsplan</SelectItem>
+              <SelectItem value="Monat">Monatsplan</SelectItem>
+              <SelectItem value="Woche">Wochenplan</SelectItem>
+              <SelectItem value="Tag">Tagesplan</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Saisonphase</Label>
+          <Select
+            value={form.saisonphase}
+            onValueChange={(v) => handleChange("saisonphase", v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Wählen..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Vorbereitung">Vorbereitung</SelectItem>
+              <SelectItem value="Meisterschaft">Meisterschaft</SelectItem>
+              <SelectItem value="Winterpause">Winterpause</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
           <Label>Saisonziel</Label>
-          <Select
+          <Input
             value={form.saisonziel}
-            onValueChange={(v) => handleChange("saisonziel", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Wählen..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="aufstieg">Aufstieg</SelectItem>
-              <SelectItem value="meisterschaft">Meisterschaft</SelectItem>
-              <SelectItem value="entwicklung">Entwicklung</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(e) => handleChange("saisonziel", e.target.value)}
+          />
         </div>
         <div>
           <Label>Spielidee</Label>
-          <Select
+          <Input
             value={form.spielidee}
-            onValueChange={(v) => handleChange("spielidee", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Wählen..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ballbesitz">Ballbesitz</SelectItem>
-              <SelectItem value="umschalten">Umschalten</SelectItem>
-              <SelectItem value="pressing">Pressing</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(e) => handleChange("spielidee", e.target.value)}
+          />
         </div>
         <div>
           <Label>Formation</Label>
@@ -224,40 +225,40 @@ export function TrainingForm() {
       </div>
 
       <div>
-        <Label>Entwicklungsschwerpunkte</Label>
+        <Label>Fokus</Label>
         <Input
-          value={form.entwicklungsschwerpunkte}
-          onChange={(e) => handleChange("entwicklungsschwerpunkte", e.target.value)}
+          value={form.fokus}
+          onChange={(e) => handleChange("fokus", e.target.value)}
         />
       </div>
       <div>
-        <Label>Philosophie</Label>
+        <Label>Trainingsphilosophie</Label>
         <Select
-          value={form.philosophie}
-          onValueChange={(v) => handleChange("philosophie", v)}
+          value={form.trainingsphilosophie}
+          onValueChange={(v) => handleChange("trainingsphilosophie", v)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Wählen..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="dfb">DFB</SelectItem>
-            <SelectItem value="nl">Niederlande</SelectItem>
-            <SelectItem value="esp">Spanien</SelectItem>
+            <SelectItem value="DFB">DFB</SelectItem>
+            <SelectItem value="Niederlande">Niederlande</SelectItem>
+            <SelectItem value="Spanien">Spanien</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div>
-        <Label>Konkretes Ziel</Label>
+        <Label>Schwachstellen</Label>
         <Textarea
-          value={form.ziel_konkret}
-          onChange={(e) => handleChange("ziel_konkret", e.target.value)}
+          value={form.schwachstellen}
+          onChange={(e) => handleChange("schwachstellen", e.target.value)}
         />
       </div>
       <div>
         <Label>Platz / Material</Label>
         <Textarea
-          value={form.platz_material}
-          onChange={(e) => handleChange("platz_material", e.target.value)}
+          value={form.platz}
+          onChange={(e) => handleChange("platz", e.target.value)}
         />
       </div>
       <div>
@@ -276,3 +277,5 @@ export function TrainingForm() {
     </div>
   );
 }
+
+
