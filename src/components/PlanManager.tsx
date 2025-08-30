@@ -84,14 +84,19 @@ export function PlanManager() {
       return;
     }
 
+
     const payload = mapPlanToPayload(
-      {
-        ...submission,
-        month_year: newMonthYear,
-        user_id: userId,
-      },
-      "Monat"
-    );
+  {
+    ...submission,
+    month_year: newMonthYear,
+    user_id: userId,
+    spielerkader: submission.spielerkader ?? spielerkader,
+    torhueter: submission.torhueter ?? torhueter,
+    tage_pro_woche: submission.tage_pro_woche ?? tageProWoche,
+    einheit_dauer: submission.einheit_dauer ?? einheitDauer,
+  },
+  "Monat"
+);
 
     setLastPayload(payload);
 
