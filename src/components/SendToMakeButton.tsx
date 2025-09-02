@@ -2,25 +2,28 @@ import React, { useState } from "react";
 import { mapPlanToPayload } from "@/utils/mapPlanToPayload";
 
 interface Props {
-  plan: any;               // der komplette Plan (Monat, Woche, Tag)
-  typ: "Monat" | "Woche" | "Tag"; // explizit Typ mitgeben
+  plan: any;                       // kompletter Plan (Monat, Woche, Tag)
+  typ: "Monat" | "Woche" | "Tag";  // explizit Typ mitgeben
+  submission?: any;                // Stammdaten optional
 }
 
-const SendToMakeButton: React.FC<Props> = ({ plan, typ }) => {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+export default function SendToMakeButton({ plan, typ, submission }: Props) {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const sendToMake = async () => {
-    setStatus("loading");
-
-    // Debug-Ausgaben ins Browser-Log
-    console.log("👉 Typ:", typ);
-    console.log("👉 Plan (roh):", plan);
-
-    // Payload bauen
-    const payload = mapPlanToPayload(plan, typ);
-    console.log("👉 Payload (gebaut):", payload);
+  const handleSend = async () => {
+    setLoading(true);
+    setMessage(null);
 
     try {
+      // Plan + Stammdaten mergen (Plan überschreibt Stammdaten)
+      const mergedPlan = {
+        ...submission,
+        ...plan,
+      };
+
+      const payload = mapPlanToPayload(mergedPlan, typ);
+
       const response = await fetch(
         "https://hook.eu2.make.com/jr6wvnrr27mc7wr0r73pkstjb2o75z5p",
         {
@@ -30,37 +33,27 @@ const SendToMakeButton: React.FC<Props> = ({ plan, typ }) => {
         }
       );
 
-      if (!response.ok) throw new Error("Fehler beim Webhook-Request");
+      if (!response.ok) throw new Error("Fehler beim Senden");
 
-      console.log("✅ Request erfolgreich:", response.status);
-      setStatus("success");
-      setTimeout(() => setStatus("idle"), 3000);
+      setMessage("✅ Erfolgreich an Make gesendet");
     } catch (err) {
-      console.error("❌ Fehler beim Request:", err);
-      setStatus("error");
-      setTimeout(() => setStatus("idle"), 4000);
+      console.error(err);
+      setMessage("❌ Fehler beim Senden");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <button
-      onClick={sendToMake}
-      disabled={status === "loading"}
-      className={`px-4 py-2 rounded-lg text-white ${
-        status === "loading"
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
-      }`}
-    >
-      {status === "loading"
-        ? "Senden..."
-        : status === "success"
-        ? "✅ Gesendet"
-        : status === "error"
-        ? "❌ Fehler"
-        : "An Make senden"}
-    </button>
+    <div className="flex flex-col items-start">
+      <button
+        onClick={handleSend}
+        disabled={loading}
+        className="bg-green-600 text-white px-4 py-2 rounded"
+      >
+        {loading ? "Sende..." : "An Make senden"}
+      </button>
+      {message && <p className="text-xs mt-1">{message}</p>}
+    </div>
   );
-};
-
-export default SendToMakeButton;
+}
