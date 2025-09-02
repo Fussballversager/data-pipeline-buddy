@@ -13,6 +13,7 @@ export function PlanManager() {
   const [monthPlans, setMonthPlans] = useState<any[]>([]);
   const [weekPlans, setWeekPlans] = useState<any[]>([]);
   const [dayPlans, setDayPlans] = useState<any[]>([]);
+  const [submission, setSubmission] = useState<any | null>(null); // 👈 Stammdaten
 
   const [newMonthYear, setNewMonthYear] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,18 +35,29 @@ export function PlanManager() {
       if (!userData.user) return;
       const userId = userData.user.id;
 
+      // Stammdaten laden
+      const { data: submissionData } = await supabase
+        .from("taggy_submissions")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      setSubmission(submissionData);
+
+      // Monatspläne laden
       const { data: months } = await supabase
         .from("month_plans")
         .select("*")
         .eq("user_id", userId)
         .order("month_year", { ascending: true });
 
+      // Wochenpläne laden
       const { data: weeks } = await supabase
         .from("week_plans")
         .select("*")
         .eq("user_id", userId)
         .order("calendar_week", { ascending: true });
 
+      // Tagespläne laden
       const { data: days } = await supabase
         .from("day_plans")
         .select("*")
@@ -84,19 +96,18 @@ export function PlanManager() {
       return;
     }
 
-
     const payload = mapPlanToPayload(
-  {
-    ...submission,
-    month_year: newMonthYear,
-    user_id: userId,
-    spielerkader: submission.spielerkader ?? spielerkader,
-    torhueter: submission.torhueter ?? torhueter,
-    tage_pro_woche: submission.tage_pro_woche ?? tageProWoche,
-    einheit_dauer: submission.einheit_dauer ?? einheitDauer,
-  },
-  "Monat"
-);
+      {
+        ...submission,
+        month_year: newMonthYear,
+        user_id: userId,
+        spielerkader: submission.spielerkader ?? spielerkader,
+        torhueter: submission.torhueter ?? torhueter,
+        tage_pro_woche: submission.tage_pro_woche ?? tageProWoche,
+        einheit_dauer: submission.einheit_dauer ?? einheitDauer,
+      },
+      "Monat"
+    );
 
     setLastPayload(payload);
 
@@ -143,7 +154,9 @@ export function PlanManager() {
                   >
                     Öffnen
                   </Button>
-                  <SendToMakeButton plan={p} typ="Monat" />
+                  {submission && (
+                    <SendToMakeButton plan={p} typ="Monat" submission={submission} />
+                  )}
                 </div>
               </li>
             ))}
@@ -189,7 +202,13 @@ export function PlanManager() {
                     >
                       Öffnen
                     </Button>
-                    <SendToMakeButton plan={{ ...p, month_year: monthYear }} typ="Woche" />
+                    {submission && (
+                      <SendToMakeButton
+                        plan={{ ...p, month_year: monthYear }}
+                        typ="Woche"
+                        submission={submission}
+                      />
+                    )}
                   </div>
                 </li>
               );
@@ -213,7 +232,9 @@ export function PlanManager() {
                   >
                     Öffnen
                   </Button>
-                  <SendToMakeButton plan={p} typ="Tag" />
+                  {submission && (
+                    <SendToMakeButton plan={p} typ="Tag" submission={submission} />
+                  )}
                 </div>
               </li>
             ))}

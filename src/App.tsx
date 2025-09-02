@@ -9,6 +9,9 @@ import { LayoutDashboard } from "lucide-react";
 import { PlanManager } from "@/components/PlanManager";
 import { CalendarCheck } from "lucide-react";
 import { PlanViewer } from "@/components/PlanViewer";
+import { TrainingDayOverview } from "@/components/TrainingDayOverview";
+import DayPlanPage from "@/pages/DayPlanPage";
+
 
 
 // Kleine Wrapper-Komponente für NavButton mit Icon
@@ -96,6 +99,7 @@ const App = () => (
     }
      />
 
+<Route path="/plans/day/:id" element={<DayPlanPage />} />
 
     </Routes>
   </BrowserRouter>
