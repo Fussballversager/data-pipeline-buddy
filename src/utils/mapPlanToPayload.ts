@@ -7,6 +7,7 @@ export function mapPlanToPayload(plan: any, typ: "Monat" | "Woche" | "Tag") {
     spielidee: plan.spielidee,
     match_formation: plan.match_formation,
     trainingsphilosophie: plan.trainingsphilosophie,
+    fokus: plan.fokus,                // 👈 hinzugefügt
     schwachstellen: plan.schwachstellen,
     platz: plan.platz,
     notizen: plan.notizen,

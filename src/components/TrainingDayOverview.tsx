@@ -30,7 +30,7 @@ export function TrainingDayOverview({ dayPlanId }: { dayPlanId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       const { data, error } = await supabase
-        .from("training_day_overview_json")
+        .from("view_training_day_overview_json")
         .select("*")
         .eq("day_plan_id", dayPlanId)
         .single();

@@ -11,6 +11,12 @@ import { CalendarCheck } from "lucide-react";
 import { PlanViewer } from "@/components/PlanViewer";
 import { TrainingDayOverview } from "@/components/TrainingDayOverview";
 import DayPlanPage from "@/pages/DayPlanPage";
+import { MonthOverview } from "@/pages/MonthOverview";
+import { WeekOverview } from "@/pages/WeekOverview";
+import { DayOverview } from "@/pages/DayOverview";
+import { MonthDetail } from "@/pages/MonthDetail";
+import { WeekDetail } from "@/pages/WeekDetail";
+import { DayDetail } from "@/pages/DayDetail";
 
 
 
@@ -43,6 +49,7 @@ const App = () => (
       <NavButton to="/trainingform" label="Trainingsdaten" icon={Dumbbell} />
       <NavButton to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
       <NavButton to="/planmanager" label="Plan-Manager" icon={CalendarCheck} />
+      <NavButton to="/months" label="Monate" icon={CalendarCheck} />
 
     </nav>
 
@@ -99,7 +106,16 @@ const App = () => (
     }
      />
 
-<Route path="/plans/day/:id" element={<DayPlanPage />} />
+      <Route path="/plans/day/:id" element={<DayPlanPage />} />
+
+      <Route path="/months" element={<MonthOverview />} />
+      <Route path="/month/:monthId" element={<MonthDetail />} />
+
+      <Route path="/weeks/:monthId" element={<WeekOverview />} />
+      <Route path="/week/:weekId" element={<WeekDetail />} />
+
+      <Route path="/days/:weekId" element={<DayOverview />} />
+     <Route path="/day/:dayId" element={<DayDetail />} />
 
     </Routes>
   </BrowserRouter>

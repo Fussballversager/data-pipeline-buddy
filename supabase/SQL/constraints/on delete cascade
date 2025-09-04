@@ -1,0 +1,23 @@
+-- 1. WeekPlans hängt an MonthPlans
+ALTER TABLE week_plans
+DROP CONSTRAINT IF EXISTS week_plans_month_plan_id_fkey,
+ADD CONSTRAINT week_plans_month_plan_id_fkey
+  FOREIGN KEY (month_plan_id)
+  REFERENCES month_plans(id)
+  ON DELETE CASCADE;
+
+-- 2. DayPlans hängt an WeekPlans
+ALTER TABLE day_plans
+DROP CONSTRAINT IF EXISTS day_plans_week_plan_id_fkey,
+ADD CONSTRAINT day_plans_week_plan_id_fkey
+  FOREIGN KEY (week_plan_id)
+  REFERENCES week_plans(id)
+  ON DELETE CASCADE;
+
+-- 3. Sections hängt an DayPlans
+ALTER TABLE sections
+DROP CONSTRAINT IF EXISTS sections_day_id_fkey,
+ADD CONSTRAINT sections_day_id_fkey
+  FOREIGN KEY (day_id)
+  REFERENCES day_plans(id)
+  ON DELETE CASCADE;
