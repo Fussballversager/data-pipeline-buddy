@@ -101,6 +101,9 @@ export function PlanManager() {
         ...submission,
         month_year: newMonthYear,
         user_id: userId,
+        fokus: submission.fokus ?? "–",           // 👈 NEU
+        schwachstellen: submission.schwachstellen ?? "–", // 👈 NEU
+        notizen: submission.notizen ?? null,      // 👈 NEU
         spielerkader: submission.spielerkader ?? spielerkader,
         torhueter: submission.torhueter ?? torhueter,
         tage_pro_woche: submission.tage_pro_woche ?? tageProWoche,

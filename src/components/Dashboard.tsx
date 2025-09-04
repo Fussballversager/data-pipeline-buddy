@@ -14,102 +14,170 @@ export function Dashboard() {
     allDayPlans,
   } = usePlans();
 
-  if (loading) return <div className="p-6">⏳ Lade Dashboard...</div>;
+  if (loading) return <div className="p-6 text-gray-200">⏳ Lade Dashboard...</div>;
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 space-y-8">
-      <CardHeader>
-        <CardTitle>Dashboard</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* --- Aktuelle Buttons --- */}
-        <div className="flex gap-2">
-          {currentMonthPlan && (
-            <Link to={`/plans/month/${currentMonthPlan.id}`}>
-              <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                Aktueller Monat ({currentMonthPlan.month_year})
-              </Button>
-            </Link>
-          )}
-          {currentWeekPlan && (
-            <Link to={`/plans/week/${currentWeekPlan.id}`}>
-              <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                Aktuelle Woche (KW {currentWeekPlan.calendar_week})
-              </Button>
-            </Link>
-          )}
-          {currentDayPlan && (
-            <Link to={`/plans/day/${currentDayPlan.id}`}>
-              <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                Heute ({currentDayPlan.training_date})
-              </Button>
-            </Link>
-          )}
-        </div>
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      {/* Dashboard Header mit Buttons */}
+      <Card className="bg-gray-800 text-gray-100 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Dashboard</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 flex-wrap">
+            {currentMonthPlan && (
+              <Link to={`/month/${currentMonthPlan.id}`}>
+                <Button
+                  size="sm"
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  Aktueller Monat ({currentMonthPlan.month_year})
+                </Button>
+              </Link>
+            )}
+            {currentWeekPlan && (
+              <Link to={`/week/${currentWeekPlan.id}`}>
+                <Button
+                  size="sm"
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  Aktuelle Woche (KW {currentWeekPlan.calendar_week})
+                </Button>
+              </Link>
+            )}
+            {currentDayPlan && (
+              <Link to={`/day/${currentDayPlan.id}`}>
+                <Button
+                  size="sm"
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  Heute ({currentDayPlan.training_date})
+                </Button>
+              </Link>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* --- Monatspläne --- */}
-        <div>
-          <h3 className="font-bold text-lg mb-2">Alle Monatspläne</h3>
+      {/* Monatspläne */}
+      <Card className="bg-gray-800 text-gray-100 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">Alle Monatspläne</CardTitle>
+        </CardHeader>
+        <CardContent>
           {allMonthPlans.length === 0 ? (
-            <p className="text-gray-500">Keine Monatspläne vorhanden</p>
+            <p className="text-gray-400">Keine Monatspläne vorhanden</p>
           ) : (
-            <ul className="space-y-1">
+            <div className="space-y-3">
               {allMonthPlans.map((p) => (
-                <li key={p.id}>
-                  <Link
-                    to={`/plans/month/${p.id}`}
-                    className="text-gray-200 hover:underline"
-                  >
-                    Monat {p.month_year}
+                <div
+                  key={p.id}
+                  className="bg-gray-700 p-4 rounded shadow-sm flex justify-between items-center"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-100">
+                      Monat {p.month_year}
+                    </h4>
+                    <p className="text-sm text-gray-200">
+                      Fokus: {p.fokus || "–"} | Schwachstellen: {p.schwachstellen || "–"}
+                    </p>
+                  </div>
+                  <Link to={`/month/${p.id}`}>
+                    <Button
+                      size="sm"
+                      className="bg-gray-600 text-white hover:bg-gray-500"
+                    >
+                      Ansehen
+                    </Button>
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* --- Wochenpläne --- */}
-        <div>
-          <h3 className="font-bold text-lg mb-2">Alle Wochenpläne</h3>
+      {/* Wochenpläne */}
+      <Card className="bg-gray-800 text-gray-100 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">Alle Wochenpläne</CardTitle>
+        </CardHeader>
+        <CardContent>
           {allWeekPlans.length === 0 ? (
-            <p className="text-gray-500">Keine Wochenpläne vorhanden</p>
+            <p className="text-gray-400">Keine Wochenpläne vorhanden</p>
           ) : (
-            <ul className="space-y-1">
+            <div className="space-y-3">
               {allWeekPlans.map((p) => (
-                <li key={p.id}>
-                  <Link
-                    to={`/plans/week/${p.id}`}
-                    className="text-gray-200 hover:underline"
-                  >
-                    KW {p.calendar_week} – {p.trainingsziel}
-                  </Link>
-                </li>
+                <div
+                  key={p.id}
+                  className="bg-gray-700 p-4 rounded shadow-sm flex justify-between items-center"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-100">
+                      KW {p.calendar_week}
+                    </h4>
+                    <p className="text-sm text-gray-200">{p.trainingsziel || "–"}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link to={`/week/${p.id}`}>
+                      <Button
+                        size="sm"
+                        className="bg-gray-600 text-white hover:bg-gray-500"
+                      >
+                        Ansehen
+                      </Button>
+                    </Link>
+                    <Link to={`/days/${p.id}`}>
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 text-white hover:bg-blue-500"
+                      >
+                        Tage öffnen
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* --- Tagespläne --- */}
-        <div>
-          <h3 className="font-bold text-lg mb-2">Alle Tagespläne</h3>
+      {/* Tagespläne */}
+      <Card className="bg-gray-800 text-gray-100 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">Alle Tagespläne</CardTitle>
+        </CardHeader>
+        <CardContent>
           {allDayPlans.length === 0 ? (
-            <p className="text-gray-500">Keine Tagespläne vorhanden</p>
+            <p className="text-gray-400">Keine Tagespläne vorhanden</p>
           ) : (
-            <ul className="space-y-1">
+            <div className="space-y-3">
               {allDayPlans.map((p) => (
-                <li key={p.id}>
-                  <Link
-                    to={`/plans/day/${p.id}`}
-                    className="text-gray-200 hover:underline"
-                  >
-                    {p.training_date} – {p.trainingsziel}
+                <div
+                  key={p.id}
+                  className="bg-gray-700 p-4 rounded shadow-sm flex justify-between items-center"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-100">
+                      {p.training_date}
+                    </h4>
+                    <p className="text-sm text-gray-200">{p.trainingsziel || "–"}</p>
+                  </div>
+                  <Link to={`/day/${p.id}`}>
+                    <Button
+                      size="sm"
+                      className="bg-gray-600 text-white hover:bg-gray-500"
+                    >
+                      Ansehen
+                    </Button>
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
