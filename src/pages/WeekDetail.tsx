@@ -42,6 +42,7 @@ export function WeekDetail() {
 
   return (
     <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200">
+      {/* Header */}
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-100">
           Woche – KW {week.calendar_week ?? "?"}{" "}
@@ -52,6 +53,7 @@ export function WeekDetail() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Breadcrumb */}
         <BreadcrumbNav
           items={[
             { label: "Monate", to: "/months" },
@@ -62,36 +64,36 @@ export function WeekDetail() {
 
         {/* Ziele & Inhalte */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Ziele & Inhalte</h3>
-          <p><b>Ziel:</b> {week.trainingsziel || "–"}</p>
-          <p><b>Schwerpunkt 1:</b> {week.schwerpunkt1 || "–"}</p>
-          <p><b>Schwerpunkt 2:</b> {week.schwerpunkt2 || "–"}</p>
-          <p><b>Schwerpunkt 3:</b> {week.schwerpunkt3 || "–"}</p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Ziele & Inhalte</h3>
+          <p className="text-base text-gray-200"><b>Ziel:</b> {week.trainingsziel || "–"}</p>
+          <p className="text-base text-gray-200"><b>Schwerpunkt 1:</b> {week.schwerpunkt1 || "–"}</p>
+          <p className="text-base text-gray-200"><b>Schwerpunkt 2:</b> {week.schwerpunkt2 || "–"}</p>
+          <p className="text-base text-gray-200"><b>Schwerpunkt 3:</b> {week.schwerpunkt3 || "–"}</p>
         </section>
 
         {/* Rahmenbedingungen */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Rahmenbedingungen</h3>
-          <p><b>Kadergröße:</b> {week.spielerkader ?? "–"}</p>
-          <p><b>Torhüter:</b> {week.torhueter ?? "–"}</p>
-          <p><b>Tage pro Woche:</b> {week.tage_pro_woche ?? "–"}</p>
-          <p><b>Dauer pro Einheit:</b> {week.einheit_dauer ?? "–"} Min</p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Rahmenbedingungen</h3>
+          <p className="text-base text-gray-200"><b>Kadergröße:</b> {week.spielerkader ?? "–"}</p>
+          <p className="text-base text-gray-200"><b>Torhüter:</b> {week.torhueter ?? "–"}</p>
+          <p className="text-base text-gray-200"><b>Tage pro Woche:</b> {week.tage_pro_woche ?? "–"}</p>
+          <p className="text-base text-gray-200"><b>Dauer pro Einheit:</b> {week.einheit_dauer ?? "–"} Min</p>
         </section>
 
         {/* Stammdaten */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Stammdaten</h3>
-          <p><b>Saisonphase:</b> {week.saisonphase || "–"}</p>
-          <p><b>Altersstufe:</b> {week.altersstufe || "–"}</p>
-          <p><b>Spielidee:</b> {week.spielidee || "–"}</p>
-          <p><b>Formation:</b> {week.match_formation || "–"}</p>
-          <p><b>Philosophie:</b> {week.trainingsphilosophie || "–"}</p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Stammdaten</h3>
+          <p className="text-base text-gray-200"><b>Saisonphase:</b> {week.saisonphase || "–"}</p>
+          <p className="text-base text-gray-200"><b>Altersstufe:</b> {week.altersstufe || "–"}</p>
+          <p className="text-base text-gray-200"><b>Spielidee:</b> {week.spielidee || "–"}</p>
+          <p className="text-base text-gray-200"><b>Formation:</b> {week.match_formation || "–"}</p>
+          <p className="text-base text-gray-200"><b>Philosophie:</b> {week.trainingsphilosophie || "–"}</p>
         </section>
 
         {/* Meta */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Meta</h3>
-          <p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Meta</h3>
+          <p className="text-sm text-gray-400">
             <b>Erstellt am:</b>{" "}
             {week.created_at
               ? new Date(week.created_at).toLocaleDateString()

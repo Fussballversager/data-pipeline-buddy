@@ -19,31 +19,21 @@ export function DayOverview() {
         return;
       }
 
-      // Woche laden
       const { data: weekData, error: weekError } = await supabase
         .from("view_week_plans")
         .select("*")
         .eq("id", weekId)
         .single();
 
-      if (weekError) {
-        console.error("❌ Fehler beim Laden der Woche:", weekError);
-      } else {
-        setWeek(weekData);
-      }
+      if (!weekError) setWeek(weekData);
 
-      // Trainingstage laden
       const { data: dayData, error: dayError } = await supabase
         .from("day_plans")
         .select("*")
         .eq("week_plan_id", weekId)
         .order("training_date", { ascending: true });
 
-      if (dayError) {
-        console.error("❌ Fehler beim Laden der Tage:", dayError);
-      } else {
-        setDays(dayData ?? []);
-      }
+      if (!dayError) setDays(dayData ?? []);
 
       setLoading(false);
     };
@@ -53,7 +43,7 @@ export function DayOverview() {
   if (loading) return <div className="p-6 text-gray-200">⏳ Lade Trainingstage...</div>;
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-black text-gray-200">
+    <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-100">
           Trainingstage – KW {week?.calendar_week ?? "?"}
@@ -69,18 +59,33 @@ export function DayOverview() {
           {days.map((d) => (
             <div
               key={d.id}
-              className="border rounded p-4 bg-gray-800 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+              className="border rounded p-4 bg-gray-700 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3"
             >
               <div>
-                <h3 className="font-bold text-gray-100">
+                <h3 className="text-lg font-semibold text-gray-100">
                   {d.training_date
                     ? new Date(d.training_date).toLocaleDateString()
                     : "?"}
                 </h3>
-                <p className="text-sm text-gray-200">
+                <p className="text-base text-gray-200">
                   <b>Ziel:</b> {d.trainingsziel || "–"}
                 </p>
+                {week && (
+                  <>
+                    <p className="text-base text-gray-200">
+                      <b>Schwerpunkte:</b>{" "}
+                      {[week.schwerpunkt1, week.schwerpunkt2, week.schwerpunkt3]
+                        .filter(Boolean)
+                        .join(", ") || "–"}
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      <b>Kader:</b> {d.spielerkader ?? "–"} Spieler,{" "}
+                      {week.torhueter ?? "–"} TW | {week.einheit_dauer ?? "–"} Min
+                    </p>
+                  </>
+                )}
               </div>
+
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   className="bg-blue-600 text-white"
@@ -95,11 +100,7 @@ export function DayOverview() {
                       .from("day_plans")
                       .delete()
                       .eq("id", d.id);
-                    if (error) {
-                      console.error("❌ Fehler beim Löschen:", error);
-                    } else {
-                      setDays(days.filter((x) => x.id !== d.id));
-                    }
+                    if (!error) setDays(days.filter((x) => x.id !== d.id));
                   }}
                 />
               </div>
@@ -107,7 +108,6 @@ export function DayOverview() {
           ))}
         </div>
 
-        {/* Zurück-Link */}
         <div className="mt-6">
           <Link
             to={`/weeks/${week?.month_plan_id}`}

@@ -39,36 +39,36 @@ export function MonthDetail() {
       <CardContent className="space-y-6">
         {/* Ziele & Inhalte */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Ziele & Inhalte</h3>
-          <p><b>Fokus:</b> {month.fokus || "–"}</p>
-          <p><b>Schwachstellen:</b> {month.schwachstellen || "–"}</p>
-          <p><b>Notizen:</b> {month.notizen || "–"}</p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Ziele & Inhalte</h3>
+          <p className="text-base text-gray-200"><b>Fokus:</b> {month.fokus || "–"}</p>
+          <p className="text-base text-gray-200"><b>Schwachstellen:</b> {month.schwachstellen || "–"}</p>
+          <p className="text-base text-gray-200"><b>Notizen:</b> {month.notizen || "–"}</p>
         </section>
 
         {/* Rahmenbedingungen */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Rahmenbedingungen</h3>
-          <p><b>Kadergröße:</b> {month.spielerkader ?? "–"}</p>
-          <p><b>Torhüter:</b> {month.torhueter ?? "–"}</p>
-          <p><b>Tage pro Woche:</b> {month.tage_pro_woche ?? "–"}</p>
-          <p><b>Dauer pro Einheit:</b> {month.einheit_dauer ?? "–"} Min</p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Rahmenbedingungen</h3>
+          <p className="text-base text-gray-200"><b>Kadergröße:</b> {month.spielerkader ?? "–"}</p>
+          <p className="text-base text-gray-200"><b>Torhüter:</b> {month.torhueter ?? "–"}</p>
+          <p className="text-base text-gray-200"><b>Tage pro Woche:</b> {month.tage_pro_woche ?? "–"}</p>
+          <p className="text-base text-gray-200"><b>Dauer pro Einheit:</b> {month.einheit_dauer ?? "–"} Min</p>
         </section>
 
         {/* Stammdaten */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Stammdaten</h3>
-          <p><b>Saisonphase:</b> {month.saisonphase || "–"}</p>
-          <p><b>Altersstufe:</b> {month.altersstufe || "–"}</p>
-          <p><b>Spielidee:</b> {month.spielidee || "–"}</p>
-          <p><b>Formation:</b> {month.match_formation || "–"}</p>
-          <p><b>Philosophie:</b> {month.trainingsphilosophie || "–"}</p>
-          <p><b>Platz:</b> {month.platz || "–"}</p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Stammdaten</h3>
+          <p className="text-base text-gray-200"><b>Saisonphase:</b> {month.saisonphase || "–"}</p>
+          <p className="text-base text-gray-200"><b>Altersstufe:</b> {month.altersstufe || "–"}</p>
+          <p className="text-base text-gray-200"><b>Spielidee:</b> {month.spielidee || "–"}</p>
+          <p className="text-base text-gray-200"><b>Formation:</b> {month.match_formation || "–"}</p>
+          <p className="text-base text-gray-200"><b>Philosophie:</b> {month.trainingsphilosophie || "–"}</p>
+          <p className="text-base text-gray-200"><b>Platz:</b> {month.platz || "–"}</p>
         </section>
 
         {/* Meta */}
         <section>
-          <h3 className="font-semibold text-gray-100 mb-2">Meta</h3>
-          <p>
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Meta</h3>
+          <p className="text-sm text-gray-400">
             <b>Erstellt am:</b>{" "}
             {month.created_at
               ? new Date(month.created_at).toLocaleDateString()

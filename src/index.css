@@ -2,93 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Design-System: alle Farben etc. */
 @layer base {
   :root {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-
     --primary: 142 76% 36%;
     --primary-foreground: 355 100% 97%;
-
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-
     --accent: 142 76% 36%;
     --accent-foreground: 0 0% 98%;
-
     --success: 142 76% 36%;
     --success-foreground: 355 100% 97%;
-
     --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 46%));
     --gradient-card: linear-gradient(145deg, hsl(240 10% 3.9%), hsl(240 8% 6%));
-    
     --shadow-elegant: 0 10px 30px -10px hsl(142 76% 36% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-
     --radius: 0.5rem;
-
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
@@ -110,5 +79,81 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Hängender Einzug für Bullet-Listen */
+.list-indent {
+  list-style-position: outside;
+  margin-left: 1.5em;
+}
+.list-indent li {
+  padding-left: 0.5em;
+  text-indent: 0;
+}
+
+/* Styling für Parallel-Hinweis */
+.parallel-hint {
+  color: #fb923c; /* orange */
+  font-weight: 600;
+}
+
+/* --- Druck/PDF Styles --- */
+@media print {
+  body {
+    color: #111 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+  }
+
+  /* Grautöne -> Schwarz */
+  .text-gray-200,
+  .text-gray-300,
+  .text-gray-400 {
+    color: #111 !important;
+  }
+
+  /* Farbbereiche kräftig */
+  .text-blue-300   { color: #1d4ed8 !important; }  /* Ablauf */
+  .text-yellow-300 { color: #b45309 !important; }  /* Zielerfolg */
+  .text-green-300  { color: #166534 !important; }  /* Coaching */
+  .text-purple-300 { color: #6b21a8 !important; }  /* Varianten */
+
+  /* Parallel-Hinweis auffällig */
+  .parallel-hint {
+    color: #c2410c !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: #fff3e0 !important;  /* hellorange Hintergrund */
+    border: 1px solid #c2410c;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Boxen klar abtrennen */
+  .print-section {
+    border: 1px solid #ccc !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    border-radius: 6px !important;
+  }
+
+  /* Buttons & Navigation ausblenden */
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Überschriften im PDF etwas größer */
+  .print-section h3 {
+    font-size: 1.2rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Seitenränder A4 */
+  @page {
+    margin: 15mm;
   }
 }
