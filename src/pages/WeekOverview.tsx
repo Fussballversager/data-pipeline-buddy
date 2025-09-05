@@ -53,7 +53,7 @@ export function WeekOverview() {
   if (loading) return <div className="p-6 text-gray-200">⏳ Lade Wochenpläne...</div>;
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-black text-gray-200">
+    <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-100">
           Wochenübersicht – Monat {month?.month_year ?? "?"}
@@ -69,21 +69,30 @@ export function WeekOverview() {
           {weeks.map((w) => (
             <div
               key={w.id}
-              className="border rounded p-4 bg-gray-800 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+              className="border rounded p-4 bg-gray-700 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3"
             >
               <div>
-                <h3 className="font-bold text-gray-100">
+                <h3 className="text-lg font-semibold text-gray-100">
                   KW {w.calendar_week ?? "–"}{" "}
-                  {w.week_start_date ? `(ab ${new Date(w.week_start_date).toLocaleDateString()})` : ""}
+                  {w.week_start_date
+                    ? `(ab ${new Date(w.week_start_date).toLocaleDateString()})`
+                    : ""}
                 </h3>
-                <p className="text-sm text-gray-200">
+                <p className="text-base text-gray-200">
                   <b>Ziel:</b> {w.trainingsziel || "–"}
                 </p>
-                <p className="text-xs text-gray-400">
-                  <b>Schwerpunkte:</b> {w.schwerpunkt1 || "–"}, {w.schwerpunkt2 || "–"},{" "}
-                  {w.schwerpunkt3 || "–"}
+                <p className="text-base text-gray-200">
+                  <b>Schwerpunkte:</b>{" "}
+                  {[w.schwerpunkt1, w.schwerpunkt2, w.schwerpunkt3]
+                    .filter(Boolean)
+                    .join(", ") || "–"}
+                </p>
+                <p className="text-sm text-gray-400">
+                  <b>Kader:</b> {w.spielerkader ?? "–"} Spieler,{" "}
+                  {w.torhueter ?? "–"} TW | {w.einheit_dauer ?? "–"} Min
                 </p>
               </div>
+
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   className="bg-blue-600 text-white"

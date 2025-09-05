@@ -48,12 +48,12 @@ export function MonthOverview() {
     }
   };
 
-  if (loading) return <div className="p-6">⏳ Lade Monate...</div>;
+  if (loading) return <div className="p-6 text-gray-200">⏳ Lade Monate...</div>;
 
   return (
     <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-100">
+        <CardTitle className="text-xl font-bold text-gray-100">
           Monatsübersicht
         </CardTitle>
       </CardHeader>
@@ -69,17 +69,17 @@ export function MonthOverview() {
           {months.map((m) => (
             <div
               key={m.id}
-              className="border rounded p-4 bg-gray-700 text-gray-100 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+              className="border rounded p-4 bg-gray-700 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3"
             >
               <div>
-                <h3 className="font-bold text-lg text-gray-100">
+                <h3 className="text-lg font-semibold text-gray-100">
                   Monat {m.month_year}
                 </h3>
-                <p className="text-sm">
+                <p className="text-base text-gray-200">
                   <b>Fokus:</b> {m.fokus || "–"} |{" "}
                   <b>Schwachstellen:</b> {m.schwachstellen || "–"}
                 </p>
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-gray-400">
                   Kader: {m.spielerkader ?? "–"} | TW: {m.torhueter ?? "–"} |{" "}
                   {m.tage_pro_woche ?? "–"}x/Woche | {m.einheit_dauer ?? "–"} Min
                 </p>

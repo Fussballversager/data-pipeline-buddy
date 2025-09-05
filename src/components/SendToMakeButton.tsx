@@ -51,7 +51,7 @@ export default function SendToMakeButton({ plan, typ, submission }: Props) {
         disabled={loading}
         className="bg-green-600 text-white px-4 py-2 rounded"
       >
-        {loading ? "Sende..." : "An Make senden"}
+        {loading ? "Sende..." : "An Taggy-KI senden"}
       </button>
       {message && <p className="text-xs mt-1">{message}</p>}
     </div>
