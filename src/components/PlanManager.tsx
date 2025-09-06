@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,6 @@ import SendToMakeButton from "@/components/SendToMakeButton";
 import { mapPlanToPayload } from "../utils/mapPlanToPayload"; // 👈 korrekt
 
 export function PlanManager() {
-  const navigate = useNavigate();
-
   const [monthPlans, setMonthPlans] = useState<any[]>([]);
   const [weekPlans, setWeekPlans] = useState<any[]>([]);
   const [dayPlans, setDayPlans] = useState<any[]>([]);
@@ -19,12 +16,10 @@ export function PlanManager() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const [selectedWeek, setSelectedWeek] = useState<any | null>(null);
   const [tageProWoche, setTageProWoche] = useState<number>(3);
   const [einheitDauer, setEinheitDauer] = useState<number>(90);
   const [spielerkader, setSpielerkader] = useState<number>(18);
   const [torhueter, setTorhueter] = useState<number>(2);
-  const [weekStartDate, setWeekStartDate] = useState<string>("");
 
   // zuletzt gesendetes Payload für Debug
   const [lastPayload, setLastPayload] = useState<any | null>(null);
@@ -101,9 +96,9 @@ export function PlanManager() {
         ...submission,
         month_year: newMonthYear,
         user_id: userId,
-        fokus: submission.fokus ?? "–",           // 👈 NEU
-        schwachstellen: submission.schwachstellen ?? "–", // 👈 NEU
-        notizen: submission.notizen ?? null,      // 👈 NEU
+        fokus: submission.fokus ?? "–",
+        schwachstellen: submission.schwachstellen ?? "–",
+        notizen: submission.notizen ?? null,
         spielerkader: submission.spielerkader ?? spielerkader,
         torhueter: submission.torhueter ?? torhueter,
         tage_pro_woche: submission.tage_pro_woche ?? tageProWoche,
@@ -150,17 +145,9 @@ export function PlanManager() {
             {monthPlans.map((p) => (
               <li key={p.id} className="flex justify-between">
                 <span>{p.month_year}</span>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => navigate(`/plans/month/${p.id}`)}
-                    className="bg-blue-600 text-white"
-                  >
-                    Öffnen
-                  </Button>
-                  {submission && (
-                    <SendToMakeButton plan={p} typ="Monat" submission={submission} />
-                  )}
-                </div>
+                {submission && (
+                  <SendToMakeButton plan={p} typ="Monat" submission={submission} />
+                )}
               </li>
             ))}
           </ul>
@@ -189,30 +176,18 @@ export function PlanManager() {
             {weekPlans.map((p) => {
               const monthYear = monthPlans.find(m => m.id === p.month_plan_id)?.month_year;
               return (
-                <li
-                  key={p.id}
-                  className="flex justify-between items-center cursor-pointer"
-                  onClick={() => setSelectedWeek(p)}
-                >
+                <li key={p.id} className="flex justify-between items-center cursor-pointer">
                   <span>
                     {monthYear ?? "?"} – KW {p.calendar_week ?? "?"} –{" "}
                     {p.trainingsziel ? p.trainingsziel.slice(0, 40) : "kein Ziel"}
                   </span>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => navigate(`/plans/week/${p.id}`)}
-                      className="bg-blue-600 text-white"
-                    >
-                      Öffnen
-                    </Button>
-                    {submission && (
-                      <SendToMakeButton
-                        plan={{ ...p, month_year: monthYear }}
-                        typ="Woche"
-                        submission={submission}
-                      />
-                    )}
-                  </div>
+                  {submission && (
+                    <SendToMakeButton
+                      plan={{ ...p, month_year: monthYear }}
+                      typ="Woche"
+                      submission={submission}
+                    />
+                  )}
                 </li>
               );
             })}
@@ -228,17 +203,9 @@ export function PlanManager() {
                 <span>
                   {p.training_date} – Ziel: {p.trainingsziel?.slice(0, 30)}...
                 </span>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => navigate(`/plans/day/${p.id}`)}
-                    className="bg-blue-600 text-white"
-                  >
-                    Öffnen
-                  </Button>
-                  {submission && (
-                    <SendToMakeButton plan={p} typ="Tag" submission={submission} />
-                  )}
-                </div>
+                {submission && (
+                  <SendToMakeButton plan={p} typ="Tag" submission={submission} />
+                )}
               </li>
             ))}
           </ul>
