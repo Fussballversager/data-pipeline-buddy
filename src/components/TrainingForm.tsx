@@ -242,8 +242,11 @@ export function TrainingForm() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="DFB">DFB</SelectItem>
+            <SelectItem value="Horst Wein Funino">Horst Wein</SelectItem>
             <SelectItem value="Niederlande">Niederlande</SelectItem>
             <SelectItem value="Spanien">Spanien</SelectItem>
+            <SelectItem value="Dribbler">Dribbler</SelectItem>
+            <SelectItem value="Quälix">Magath</SelectItem>
           </SelectContent>
         </Select>
       </div>

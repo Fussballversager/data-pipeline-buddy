@@ -1,16 +1,17 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SendToMakeButton from "@/components/SendToMakeButton"; 
-import { mapPlanToPayload } from "../utils/mapPlanToPayload"; // 👈 korrekt
+import { mapPlanToPayload } from "../utils/mapPlanToPayload";
 
 export function PlanManager() {
   const [monthPlans, setMonthPlans] = useState<any[]>([]);
   const [weekPlans, setWeekPlans] = useState<any[]>([]);
   const [dayPlans, setDayPlans] = useState<any[]>([]);
-  const [submission, setSubmission] = useState<any | null>(null); // 👈 Stammdaten
+  const [submission, setSubmission] = useState<any | null>(null);
 
   const [newMonthYear, setNewMonthYear] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,11 @@ export function PlanManager() {
   const [spielerkader, setSpielerkader] = useState<number>(18);
   const [torhueter, setTorhueter] = useState<number>(2);
 
-  // zuletzt gesendetes Payload für Debug
+  // Overrides für Tests
+  const [overridePhilosophie, setOverridePhilosophie] = useState<string | null>(null);
+  const [overrideAltersstufe, setOverrideAltersstufe] = useState<string | null>(null);
+  const [overrideSpielerkader, setOverrideSpielerkader] = useState<number | null>(null);
+
   const [lastPayload, setLastPayload] = useState<any | null>(null);
 
   useEffect(() => {
@@ -30,13 +35,20 @@ export function PlanManager() {
       if (!userData.user) return;
       const userId = userData.user.id;
 
-      // Stammdaten laden
+      // Stammdaten laden (taggy_submissions + user_profiles mergen)
       const { data: submissionData } = await supabase
         .from("taggy_submissions")
         .select("*")
         .eq("user_id", userId)
         .single();
-      setSubmission(submissionData);
+
+      const { data: profileData } = await supabase
+        .from("user_profiles")
+        .select("team, altersstufe, verein, display_name")
+        .eq("user_id", userId)
+        .single();
+
+      setSubmission({ ...submissionData, ...profileData });
 
       // Monatspläne laden
       const { data: months } = await supabase
@@ -104,7 +116,8 @@ export function PlanManager() {
         tage_pro_woche: submission.tage_pro_woche ?? tageProWoche,
         einheit_dauer: submission.einheit_dauer ?? einheitDauer,
       },
-      "Monat"
+      "Monat",
+      { overridePhilosophie, overrideAltersstufe, overrideSpielerkader }
     );
 
     setLastPayload(payload);
@@ -138,6 +151,59 @@ export function PlanManager() {
       </CardHeader>
       <CardContent className="space-y-8">
 
+        {/* Override Panel */}
+        <div className="mt-6 space-y-3 p-3 border border-gray-600 rounded">
+          <h4 className="font-bold text-gray-200">Test-Overrides (nur Debug)</h4>
+
+          {/* Philosophie */}
+          <div className="flex gap-2 items-center">
+            <label className="text-sm text-gray-300 w-32">Philosophie:</label>
+            <select
+              className="bg-gray-700 text-white px-2 py-1 rounded"
+              value={overridePhilosophie ?? ""}
+              onChange={(e) => setOverridePhilosophie(e.target.value || null)}
+            >
+              <option value="">(DB nutzen)</option>
+              <option value="DFB">DFB</option>
+              <option value="Horst Wein">Horst Wein</option>
+              <option value="Niederlande">Niederlande</option>
+              <option value="Spanien">Spanien</option>
+              <option value="Dribbler">Dribbler</option>
+              <option value="Magath">Magath</option>
+            </select>
+          </div>
+
+          {/* Altersstufe */}
+          <div className="flex gap-2 items-center">
+            <label className="text-sm text-gray-300 w-32">Altersstufe:</label>
+            <input
+              type="text"
+              className="bg-gray-700 text-white px-2 py-1 rounded"
+              placeholder="z. B. U15"
+              value={overrideAltersstufe ?? ""}
+              onChange={(e) => setOverrideAltersstufe(e.target.value || null)}
+            />
+          </div>
+
+          {/* Spielerkader */}
+          <div className="flex gap-2 items-center">
+            <label className="text-sm text-gray-300 w-32">Spielerkader:</label>
+            <select
+              className="bg-gray-700 text-white px-2 py-1 rounded"
+              value={overrideSpielerkader ?? ""}
+              onChange={(e) =>
+                setOverrideSpielerkader(e.target.value ? parseInt(e.target.value) : null)
+              }
+            >
+              <option value="">(DB nutzen)</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+        </div>
+
         {/* Monatspläne */}
         <div>
           <h3 className="font-bold text-lg mb-2">Monatspläne</h3>
@@ -146,7 +212,12 @@ export function PlanManager() {
               <li key={p.id} className="flex justify-between">
                 <span>{p.month_year}</span>
                 {submission && (
-                  <SendToMakeButton plan={p} typ="Monat" submission={submission} />
+                  <SendToMakeButton
+                    plan={p}
+                    typ="Monat"
+                    submission={submission}
+                    overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
+                  />
                 )}
               </li>
             ))}
@@ -174,7 +245,7 @@ export function PlanManager() {
           <h3 className="font-bold text-lg mb-2">Wochenpläne</h3>
           <ul className="space-y-2">
             {weekPlans.map((p) => {
-              const monthYear = monthPlans.find(m => m.id === p.month_plan_id)?.month_year;
+              const monthYear = monthPlans.find((m) => m.id === p.month_plan_id)?.month_year;
               return (
                 <li key={p.id} className="flex justify-between items-center cursor-pointer">
                   <span>
@@ -186,6 +257,7 @@ export function PlanManager() {
                       plan={{ ...p, month_year: monthYear }}
                       typ="Woche"
                       submission={submission}
+                      overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
                     />
                   )}
                 </li>
@@ -204,7 +276,12 @@ export function PlanManager() {
                   {p.training_date} – Ziel: {p.trainingsziel?.slice(0, 30)}...
                 </span>
                 {submission && (
-                  <SendToMakeButton plan={p} typ="Tag" submission={submission} />
+                  <SendToMakeButton
+                    plan={p}
+                    typ="Tag"
+                    submission={submission}
+                    overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
+                  />
                 )}
               </li>
             ))}
