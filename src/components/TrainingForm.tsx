@@ -23,8 +23,7 @@ export function TrainingForm() {
     torhueter: "",
     tage_pro_woche: "",
     einheit_dauer: "",
-    plan_typ: "",
-    saisonphase: "", // neu
+    saisonphase: "",
     saisonziel: "",
     spielidee: "",
     match_formation: "",
@@ -41,6 +40,7 @@ export function TrainingForm() {
       if (data.user) {
         setUserId(data.user.id);
 
+        // 1. Trainingsdaten laden
         const { data: submission, error } = await supabase
           .from("taggy_submissions")
           .select("*")
@@ -49,13 +49,13 @@ export function TrainingForm() {
           .single();
 
         if (!error && submission) {
+          // Trainingsdaten vorhanden → Formular damit füllen
           setForm({
             altersstufe: submission.altersstufe ?? "",
             spielerkader: submission.spielerkader ?? "",
             torhueter: submission.torhueter ?? "",
             tage_pro_woche: submission.tage_pro_woche ?? "",
             einheit_dauer: submission.einheit_dauer ?? "",
-            plan_typ: submission.plan_typ ?? "",
             saisonphase: submission.saisonphase ?? "",
             saisonziel: submission.saisonziel ?? "",
             spielidee: submission.spielidee ?? "",
@@ -66,6 +66,22 @@ export function TrainingForm() {
             platz: submission.platz ?? "",
             notizen: submission.notizen ?? "",
           });
+        } else {
+          // Noch keine Trainingsdaten → Stammdaten holen
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("altersstufe, spieleranzahl")
+            .eq("user_id", data.user.id)
+            .limit(1)
+            .single();
+
+          if (profile) {
+            setForm((prev: any) => ({
+              ...prev,
+              altersstufe: profile.altersstufe ?? "",
+              spielerkader: profile.spieleranzahl ?? "",
+            }));
+          }
         }
       }
     });
@@ -84,26 +100,35 @@ export function TrainingForm() {
     setLoading(true);
     setMessage(null);
 
-    const { error } = await supabase.from("taggy_submissions").upsert([
-      {
-        user_id: userId,
-        altersstufe: form.altersstufe,
-        spielerkader: form.spielerkader ? parseInt(form.spielerkader, 10) : null,
-        torhueter: form.torhueter ? parseInt(form.torhueter, 10) : null,
-        tage_pro_woche: form.tage_pro_woche ? parseInt(form.tage_pro_woche, 10) : null,
-        einheit_dauer: form.einheit_dauer ? parseInt(form.einheit_dauer, 10) : null,
-        plan_typ: form.plan_typ,
-        saisonphase: form.saisonphase,
-        saisonziel: form.saisonziel,
-        spielidee: form.spielidee,
-        match_formation: form.match_formation,
-        fokus: form.fokus,
-        trainingsphilosophie: form.trainingsphilosophie,
-        schwachstellen: form.schwachstellen,
-        platz: form.platz,
-        notizen: form.notizen,
-      },
-    ]);
+    const { error } = await supabase.from("taggy_submissions").upsert(
+      [
+        {
+          user_id: userId,
+          altersstufe: form.altersstufe,
+          spielerkader: form.spielerkader
+            ? parseInt(form.spielerkader, 10)
+            : null,
+          torhueter: form.torhueter ? parseInt(form.torhueter, 10) : null,
+          tage_pro_woche: form.tage_pro_woche
+            ? parseInt(form.tage_pro_woche, 10)
+            : null,
+          einheit_dauer: form.einheit_dauer
+            ? parseInt(form.einheit_dauer, 10)
+            : null,
+          plan_typ: "Monat", // immer fest
+          saisonphase: form.saisonphase,
+          saisonziel: form.saisonziel,
+          spielidee: form.spielidee,
+          match_formation: form.match_formation,
+          fokus: form.fokus,
+          trainingsphilosophie: form.trainingsphilosophie,
+          schwachstellen: form.schwachstellen,
+          platz: form.platz,
+          notizen: form.notizen,
+        },
+      ],
+      { onConflict: ["user_id"] } // überschreibt statt neu
+    );
 
     setLoading(false);
 
@@ -117,7 +142,7 @@ export function TrainingForm() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h2 className="text-xl font-bold">Trainings-Parameter</h2>
+      <h2 className="text-xl font-bold">Trainingsdaten</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -128,7 +153,7 @@ export function TrainingForm() {
           />
         </div>
         <div>
-          <Label>Kadergröße</Label>
+          <Label>Spielerkader</Label>
           <Input
             type="number"
             value={form.spielerkader}
@@ -160,22 +185,6 @@ export function TrainingForm() {
           />
         </div>
         <div>
-          <Label>Plan-Typ</Label>
-          <Select
-            value={form.plan_typ}
-            onValueChange={(v) => handleChange("plan_typ", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Wählen..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Monat">Monatsplan</SelectItem>
-              <SelectItem value="Woche">Wochenplan</SelectItem>
-              <SelectItem value="Tag">Tagesplan</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
           <Label>Saisonphase</Label>
           <Select
             value={form.saisonphase}
@@ -191,37 +200,38 @@ export function TrainingForm() {
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>Saisonziel</Label>
-          <Input
-            value={form.saisonziel}
-            onChange={(e) => handleChange("saisonziel", e.target.value)}
-          />
-        </div>
-        <div>
-          <Label>Spielidee</Label>
-          <Input
-            value={form.spielidee}
-            onChange={(e) => handleChange("spielidee", e.target.value)}
-          />
-        </div>
-        <div>
-          <Label>Formation</Label>
-          <Select
-            value={form.match_formation}
-            onValueChange={(v) => handleChange("match_formation", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Wählen..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="4-3-3">4-3-3</SelectItem>
-              <SelectItem value="4-2-3-1">4-2-3-1</SelectItem>
-              <SelectItem value="3-5-2">3-5-2</SelectItem>
-              <SelectItem value="5-3-2">5-3-2</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      </div>
+
+      <div>
+        <Label>Saisonziel</Label>
+        <Input
+          value={form.saisonziel}
+          onChange={(e) => handleChange("saisonziel", e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>Spielidee</Label>
+        <Input
+          value={form.spielidee}
+          onChange={(e) => handleChange("spielidee", e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>Formation</Label>
+        <Select
+          value={form.match_formation}
+          onValueChange={(v) => handleChange("match_formation", v)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Wählen..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="4-3-3">4-3-3</SelectItem>
+            <SelectItem value="4-2-3-1">4-2-3-1</SelectItem>
+            <SelectItem value="3-5-2">3-5-2</SelectItem>
+            <SelectItem value="5-3-2">5-3-2</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -280,5 +290,3 @@ export function TrainingForm() {
     </div>
   );
 }
-
-

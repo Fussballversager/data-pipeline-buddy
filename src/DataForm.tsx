@@ -22,7 +22,7 @@ export function DataForm() {
       <h2>Stammdaten</h2>
       <input
         name="name"
-        placeholder="Name"
+        placeholder="Trainer"
         value={form.name}
         onChange={handleChange}
       />
