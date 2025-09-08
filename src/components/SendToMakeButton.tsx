@@ -3,11 +3,16 @@ import { mapPlanToPayload } from "@/utils/mapPlanToPayload";
 
 interface Props {
   plan: any;                       // kompletter Plan (Monat, Woche, Tag)
-  typ: "Monat" | "Woche" | "Tag";  // explizit Typ mitgeben
+  typ: "Monat" | "Woche" | "Tag";  // explizit Typ
   submission?: any;                // Stammdaten optional
+  overrides?: {
+    overridePhilosophie?: string | null;
+    overrideAltersstufe?: string | null;
+    overrideSpielerkader?: number | null;
+  };
 }
 
-export default function SendToMakeButton({ plan, typ, submission }: Props) {
+export default function SendToMakeButton({ plan, typ, submission, overrides }: Props) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -16,13 +21,14 @@ export default function SendToMakeButton({ plan, typ, submission }: Props) {
     setMessage(null);
 
     try {
-      // Plan + Stammdaten mergen (Plan überschreibt Stammdaten)
+      // Plan + Stammdaten mergen
       const mergedPlan = {
         ...submission,
         ...plan,
       };
 
-      const payload = mapPlanToPayload(mergedPlan, typ);
+      // Payload generieren (mit Overrides)
+      const payload = mapPlanToPayload(mergedPlan, typ, overrides);
 
       const response = await fetch(
         "https://hook.eu2.make.com/jr6wvnrr27mc7wr0r73pkstjb2o75z5p",
@@ -49,7 +55,7 @@ export default function SendToMakeButton({ plan, typ, submission }: Props) {
       <button
         onClick={handleSend}
         disabled={loading}
-        className="bg-green-600 text-white px-4 py-2 rounded"
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
       >
         {loading ? "Sende..." : "An Taggy-KI senden"}
       </button>

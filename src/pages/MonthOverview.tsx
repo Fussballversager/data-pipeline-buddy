@@ -117,21 +117,6 @@ export function MonthOverview() {
           ))}
         </div>
 
-        {/* Neuer Monat */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-2 items-center">
-          <input
-            type="month"
-            value={newMonthYear}
-            onChange={(e) => setNewMonthYear(e.target.value)}
-            className="border p-2 rounded w-full sm:w-auto text-gray-900"
-          />
-          <Button
-            className="bg-green-600 text-white w-full sm:w-auto hover:bg-green-700"
-            onClick={handleCreate}
-          >
-            Neuen Monat anlegen
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

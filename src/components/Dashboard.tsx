@@ -107,37 +107,52 @@ export function Dashboard() {
             <p className="text-gray-400">Keine Wochenpläne vorhanden</p>
           ) : (
             <div className="space-y-3">
-              {allWeekPlans.map((p) => (
-                <div
-                  key={p.id}
-                  className="bg-gray-700 p-4 rounded shadow-sm flex justify-between items-center"
-                >
-                  <div>
-                    <h4 className="font-semibold text-gray-100">
-                      KW {p.calendar_week}
-                    </h4>
-                    <p className="text-sm text-gray-200">{p.trainingsziel || "–"}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link to={`/week/${p.id}`}>
-                      <Button
-                        size="sm"
-                        className="bg-gray-600 text-white hover:bg-gray-500"
-                      >
-                        Ansehen
-                      </Button>
-                    </Link>
-                    <Link to={`/days/${p.id}`}>
-                      <Button
-                        size="sm"
-                        className="bg-blue-600 text-white hover:bg-blue-500"
-                      >
-                        Tage öffnen
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              ))}
+              {[...allWeekPlans]
+                .sort((a, b) => {
+                  const monthA =
+                    allMonthPlans.find((m) => m.id === a.month_plan_id)?.month_year || "";
+                  const monthB =
+                    allMonthPlans.find((m) => m.id === b.month_plan_id)?.month_year || "";
+                  if (monthA === monthB) {
+                    return (a.calendar_week || 0) - (b.calendar_week || 0);
+                  }
+                  return monthA.localeCompare(monthB);
+                })
+                .map((p) => {
+                  const monthYear =
+                    allMonthPlans.find((m) => m.id === p.month_plan_id)?.month_year;
+                  return (
+                    <div
+                      key={p.id}
+                      className="bg-gray-700 p-4 rounded shadow-sm flex justify-between items-center"
+                    >
+                      <div>
+                        <h4 className="font-semibold text-gray-100">
+                          {monthYear ? `${monthYear} – ` : ""}KW {p.calendar_week}
+                        </h4>
+                        <p className="text-sm text-gray-200">{p.trainingsziel || "–"}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Link to={`/week/${p.id}`}>
+                          <Button
+                            size="sm"
+                            className="bg-gray-600 text-white hover:bg-gray-500"
+                          >
+                            Ansehen
+                          </Button>
+                        </Link>
+                        <Link to={`/days/${p.id}`}>
+                          <Button
+                            size="sm"
+                            className="bg-blue-600 text-white hover:bg-blue-500"
+                          >
+                            Tage öffnen
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </CardContent>
