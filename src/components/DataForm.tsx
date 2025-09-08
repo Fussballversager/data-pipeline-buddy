@@ -84,7 +84,7 @@ export function DataForm() {
       <h2 className="text-xl font-bold">Stammdaten</h2>
 
       <div>
-        <Label>Name</Label>
+        <Label>Trainer</Label>
         <Input
           name="name"
           value={form.name}
@@ -120,7 +120,7 @@ export function DataForm() {
       </div>
 
       <div>
-        <Label>Spieleranzahl</Label>
+        <Label>Spielerkader</Label>
         <Input
           name="spieleranzahl"
           type="number"
