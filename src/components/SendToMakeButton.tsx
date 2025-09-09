@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { mapPlanToPayload } from "@/utils/mapPlanToPayload";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
-  plan: any;                       // kompletter Plan (Monat, Woche, Tag)
-  typ: "Monat" | "Woche" | "Tag";  // explizit Typ
-  submission?: any;                // Stammdaten optional
+  plan: any;
+  typ: "Monat" | "Woche" | "Tag";
+  submission?: any;
   overrides?: {
     overridePhilosophie?: string | null;
     overrideAltersstufe?: string | null;
@@ -21,13 +22,7 @@ export default function SendToMakeButton({ plan, typ, submission, overrides }: P
     setMessage(null);
 
     try {
-      // Plan + Stammdaten mergen
-      const mergedPlan = {
-        ...submission,
-        ...plan,
-      };
-
-      // Payload generieren (mit Overrides)
+      const mergedPlan = { ...submission, ...plan };
       const payload = mapPlanToPayload(mergedPlan, typ, overrides);
 
       const response = await fetch(
@@ -42,6 +37,22 @@ export default function SendToMakeButton({ plan, typ, submission, overrides }: P
       if (!response.ok) throw new Error("Fehler beim Senden");
 
       setMessage("✅ Erfolgreich an Make gesendet");
+
+      // OPTIONAL: last_run_at aktualisieren
+      /*
+      const { error } = await supabase
+        .from(
+          typ === "Monat"
+            ? "month_plans"
+            : typ === "Woche"
+            ? "week_plans"
+            : "day_plans"
+        )
+        .update({ last_run_at: new Date().toISOString() })
+        .eq("id", plan.id);
+
+      if (error) console.error("❌ Fehler beim Aktualisieren von last_run_at:", error);
+      */
     } catch (err) {
       console.error(err);
       setMessage("❌ Fehler beim Senden");
@@ -55,7 +66,13 @@ export default function SendToMakeButton({ plan, typ, submission, overrides }: P
       <button
         onClick={handleSend}
         disabled={loading}
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        className={`px-4 py-2 rounded text-white ${
+          loading
+            ? "bg-gray-400 cursor-wait"
+            : plan.last_run_at
+            ? "bg-gray-500 hover:bg-green-700"
+            : "bg-green-600 hover:bg-green-700"
+        }`}
       >
         {loading ? "Sende..." : "An Taggy-KI senden"}
       </button>
