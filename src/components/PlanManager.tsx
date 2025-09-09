@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -35,7 +34,7 @@ export function PlanManager() {
       if (!userData.user) return;
       const userId = userData.user.id;
 
-      // Stammdaten laden (taggy_submissions + user_profiles mergen)
+      // Stammdaten laden
       const { data: submissionData } = await supabase
         .from("taggy_submissions")
         .select("*")
@@ -149,74 +148,43 @@ export function PlanManager() {
       <CardHeader>
         <CardTitle>Plan Manager</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-
-        {/* Override Panel */}
-        <div className="mt-6 space-y-3 p-3 border border-gray-600 rounded">
-          <h4 className="font-bold text-gray-200">Test-Overrides (nur Debug)</h4>
-
-          {/* Philosophie */}
-          <div className="flex gap-2 items-center">
-            <label className="text-sm text-gray-300 w-32">Philosophie:</label>
-            <select
-              className="bg-gray-700 text-white px-2 py-1 rounded"
-              value={overridePhilosophie ?? ""}
-              onChange={(e) => setOverridePhilosophie(e.target.value || null)}
-            >
-              <option value="">(DB nutzen)</option>
-              <option value="DFB">DFB</option>
-              <option value="Horst Wein">Horst Wein</option>
-              <option value="Niederlande">Niederlande</option>
-              <option value="Spanien">Spanien</option>
-              <option value="Dribbler">Dribbler</option>
-              <option value="Magath">Magath</option>
-            </select>
-          </div>
-
-          {/* Altersstufe */}
-          <div className="flex gap-2 items-center">
-            <label className="text-sm text-gray-300 w-32">Altersstufe:</label>
-            <input
-              type="text"
-              className="bg-gray-700 text-white px-2 py-1 rounded"
-              placeholder="z. B. U15"
-              value={overrideAltersstufe ?? ""}
-              onChange={(e) => setOverrideAltersstufe(e.target.value || null)}
-            />
-          </div>
-
-          {/* Spielerkader */}
-          <div className="flex gap-2 items-center">
-            <label className="text-sm text-gray-300 w-32">Spielerkader:</label>
-            <select
-              className="bg-gray-700 text-white px-2 py-1 rounded"
-              value={overrideSpielerkader ?? ""}
-              onChange={(e) =>
-                setOverrideSpielerkader(e.target.value ? parseInt(e.target.value) : null)
-              }
-            >
-              <option value="">(DB nutzen)</option>
-              <option value="17">17</option>
-              <option value="18">18</option>
-              <option value="19">19</option>
-              <option value="20">20</option>
-            </select>
-          </div>
-        </div>
+      <CardContent className="space-y-8 text-sm">
 
         {/* Monatspläne */}
         <div>
-          <h3 className="font-bold text-lg mb-2">Monatspläne</h3>
+          <h3 className="font-medium mb-2">Monatspläne</h3>
           <ul className="space-y-2">
             {monthPlans.map((p) => (
-              <li key={p.id} className="flex justify-between">
-                <span>{p.month_year}</span>
+              <li
+                key={p.id}
+                className={`flex justify-between items-center border rounded p-3 shadow-sm
+                  ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}
+              >
+                <div className="flex flex-col text-sm">
+                  <span className="font-medium">
+                    {p.month_year}: {p.fokus || "–"} – {p.schwachstellen || "–"}
+                  </span>
+                  <span>
+                    Kader: {p.spielerkader ?? "–"} | TW: {p.torhueter ?? "–"} |{" "}
+                    {p.tage_pro_woche ?? "–"}x/Woche | {p.einheit_dauer ?? "–"} Min{" "}
+                    {p.last_run_at && (
+                      <span className="text-green-400 font-medium">
+                        – KI genutzt am {new Date(p.last_run_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </span>
+                </div>
                 {submission && (
                   <SendToMakeButton
                     plan={p}
                     typ="Monat"
                     submission={submission}
-                    overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
+                    overrides={{
+                      overridePhilosophie,
+                      overrideAltersstufe,
+                      overrideSpielerkader,
+                    }}
+                    disabled={!!p.last_run_at}
                   />
                 )}
               </li>
@@ -242,22 +210,37 @@ export function PlanManager() {
 
         {/* Wochenpläne */}
         <div>
-          <h3 className="font-bold text-lg mb-2">Wochenpläne</h3>
+          <h3 className="font-medium mb-2">Wochenpläne</h3>
           <ul className="space-y-2">
             {weekPlans.map((p) => {
               const monthYear = monthPlans.find((m) => m.id === p.month_plan_id)?.month_year;
               return (
-                <li key={p.id} className="flex justify-between items-center cursor-pointer">
-                  <span>
-                    {monthYear ?? "?"} – KW {p.calendar_week ?? "?"} –{" "}
-                    {p.trainingsziel ? p.trainingsziel.slice(0, 40) : "kein Ziel"}
-                  </span>
+                <li
+                  key={p.id}
+                  className={`flex justify-between items-center border rounded p-3 shadow-sm
+                    ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}
+                >
+                  <div className="flex flex-col max-w-[70%]">
+                    <span className="font-medium truncate">
+                      {monthYear ?? "?"} – KW {p.calendar_week ?? "?"}: {p.trainingsziel || "kein Ziel"}
+                    </span>
+                    {p.last_run_at && (
+                      <span className="text-green-400">
+                        KI genutzt am {new Date(p.last_run_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
                   {submission && (
                     <SendToMakeButton
                       plan={{ ...p, month_year: monthYear }}
                       typ="Woche"
                       submission={submission}
-                      overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
+                      overrides={{
+                        overridePhilosophie,
+                        overrideAltersstufe,
+                        overrideSpielerkader,
+                      }}
+                      disabled={!!p.last_run_at}
                     />
                   )}
                 </li>
@@ -268,19 +251,35 @@ export function PlanManager() {
 
         {/* Tagespläne */}
         <div>
-          <h3 className="font-bold text-lg mb-2">Tagespläne</h3>
+          <h3 className="font-medium mb-2">Tagespläne</h3>
           <ul className="space-y-2">
             {dayPlans.map((p) => (
-              <li key={p.id} className="flex justify-between items-center">
-                <span>
-                  {p.training_date} – Ziel: {p.trainingsziel?.slice(0, 30)}...
-                </span>
+              <li
+                key={p.id}
+                className={`flex justify-between items-center border rounded p-3 shadow-sm
+                  ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}
+              >
+                <div className="flex flex-col max-w-[70%]">
+                  <span className="font-medium truncate">
+                    {p.training_date} – Ziel: {p.trainingsziel?.slice(0, 40) || "kein Ziel"}
+                  </span>
+                  {p.last_run_at && (
+                    <span className="text-green-400">
+                      KI genutzt am {new Date(p.last_run_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
                 {submission && (
                   <SendToMakeButton
                     plan={p}
                     typ="Tag"
                     submission={submission}
-                    overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
+                    overrides={{
+                      overridePhilosophie,
+                      overrideAltersstufe,
+                      overrideSpielerkader,
+                    }}
+                    disabled={!!p.last_run_at}
                   />
                 )}
               </li>
@@ -291,7 +290,7 @@ export function PlanManager() {
         {/* Debug Payload */}
         {lastPayload && (
           <div className="mt-6">
-            <h4 className="font-bold">Letztes gesendetes Payload</h4>
+            <h4 className="font-medium">Letztes gesendetes Payload</h4>
             <pre className="bg-gray-100 p-3 text-xs rounded overflow-x-auto whitespace-pre-wrap">
               {JSON.stringify(lastPayload, null, 2)}
             </pre>
