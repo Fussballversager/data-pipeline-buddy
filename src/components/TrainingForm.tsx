@@ -195,8 +195,10 @@ export function TrainingForm() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Vorbereitung">Vorbereitung</SelectItem>
-              <SelectItem value="Meisterschaft">Meisterschaft</SelectItem>
+              <SelectItem value="Hinrunde">Hinrunde</SelectItem>
               <SelectItem value="Winterpause">Winterpause</SelectItem>
+              <SelectItem value="Rückrunde">Rückrunde</SelectItem>
+              <SelectItem value="Saison-Ende">Saison-Ende</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -227,9 +229,13 @@ export function TrainingForm() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="4-3-3">4-3-3</SelectItem>
+            <SelectItem value="4-4-2">4-4-2</SelectItem>
+            <SelectItem value="4-1-4-1">4-1-4-1</SelectItem>
             <SelectItem value="4-2-3-1">4-2-3-1</SelectItem>
             <SelectItem value="3-5-2">3-5-2</SelectItem>
+            <SelectItem value="3-4-3">3-4-3</SelectItem>
             <SelectItem value="5-3-2">5-3-2</SelectItem>
+            <SelectItem value="5-2-3">5-2-3</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -251,14 +257,59 @@ export function TrainingForm() {
             <SelectValue placeholder="Wählen..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="DFB">DFB</SelectItem>
-            <SelectItem value="Horst Wein Funino">Horst Wein</SelectItem>
-            <SelectItem value="Niederlande">Niederlande</SelectItem>
-            <SelectItem value="Spanien">Spanien</SelectItem>
-            <SelectItem value="Dribbler">Dribbler</SelectItem>
-            <SelectItem value="Quälix">Magath</SelectItem>
+            <SelectItem value="DFB">DFB-Trainingsphilosophie</SelectItem>
+            <SelectItem value="Horst Wein Funino">Funino - Horst Wein</SelectItem>
+            <SelectItem value="Niederlande">Niederlandes Philosophie</SelectItem>
+            <SelectItem value="Spanien">Spaniens Philosophie</SelectItem>
+            <SelectItem value="Dribbler">Dribbler wie Jamal und Messi</SelectItem>
+            <SelectItem value="Quälix">Quälix wie Magath</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        <Label>Trainingsphilosophie</Label>
+        <Select
+          value={form.trainingsphilosophie}
+          onValueChange={(v) => handleChange("trainingsphilosophie", v)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Wählen..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="DFB">DFB-Trainingsphilosophie</SelectItem>
+            <SelectItem value="Horst Wein">Funino - Horst Wein</SelectItem>
+            <SelectItem value="Niederlande">Niederlandes Philosophie</SelectItem>
+            <SelectItem value="Spanien">Spaniens Philosophie</SelectItem>
+            <SelectItem value="Dribbler">Dribbler wie Jamal und Messi</SelectItem>
+            <SelectItem value="Quälix">Quälix wie Magath</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Variante 1: Statischer Block */}
+      <div className="border rounded p-4 bg-gray-700 shadow-sm mt-4">
+        <h3 className="text-lg font-bold text-gray-100 mb-2">Trainingsphilosophie</h3>
+        <ul className="list-disc pl-6 space-y-1 text-gray-200">
+          <li>
+            <b>DFB:</b> systematisch, Technik + Spielformen, klare Abläufe, strukturierte Spieleröffnung
+          </li>
+          <li>
+            <b>Horst Wein:</b> spielerisch, kleine Spielformen, Funino-Logik, Umschalten im Kleinen
+          </li>
+          <li>
+            <b>Niederlande:</b> Rondos, Spielfluss, Ballbesitz sichern, Umschalten variabel
+          </li>
+          <li>
+            <b>Spanien:</b> Positionsspiel, Tiqui-Taca, Dreiecksbildung, sofortiges Gegenpressing nach Ballverlust
+          </li>
+          <li>
+            <b>Dribbler:</b> 1v1, Kreativität, mutige Aktionen, freie Lösungen im Umschalten
+          </li>
+          <li>
+            <b>Quälix:</b> Intensität, Kondition, Disziplin, klare Lauf- und Zweikampfvorgaben
+          </li>
+        </ul>
       </div>
       <div>
         <Label>Schwerpunkte</Label>
