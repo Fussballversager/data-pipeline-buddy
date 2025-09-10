@@ -88,7 +88,7 @@ export function MonthOverview() {
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   onClick={() => navigate(`/weeks/${m.id}`)}
-                  className="bg-blue-600 text-white hover:bg-green-700"
+                  className="bg-green-600 text-white hover:bg-green-700"
                 >
                   Wochen öffnen
                 </Button>

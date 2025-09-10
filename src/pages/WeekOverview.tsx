@@ -100,12 +100,17 @@ export function WeekOverview() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  className="bg-blue-600 text-white"
-                  onClick={() => navigate(`/days/${w.id}`)}
-                >
-                  Tage öffnen
-                </Button>
+<Button
+  className={`text-white ${
+    w.day_count > 0
+      ? "bg-green-600 hover:bg-green-700"
+      : "bg-gray-500 cursor-not-allowed"
+  }`}
+  disabled={w.day_count === 0}
+  onClick={() => w.day_count > 0 && navigate(`/days/${w.id}`)}
+>
+  Tage öffnen
+</Button>
 
                 <Button
                   className="bg-gray-600 text-white"

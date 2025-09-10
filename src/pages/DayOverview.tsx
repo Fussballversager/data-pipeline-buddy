@@ -28,7 +28,7 @@ export function DayOverview() {
       if (!weekError) setWeek(weekData);
 
       const { data: dayData, error: dayError } = await supabase
-        .from("day_plans")
+        .from("view_day_plans") // wichtig: View nutzen für section_count
         .select("*")
         .eq("week_plan_id", weekId)
         .order("training_date", { ascending: true });
@@ -70,47 +70,63 @@ export function DayOverview() {
                 <p className="text-base text-gray-200">
                   <b>Ziel:</b> {d.trainingsziel || "–"}
                 </p>
-{week && (
-  <>
-    <div className="text-base text-gray-200">
-      <b>Schwerpunkte:</b>
-      {([week.schwerpunkt1, week.schwerpunkt2, week.schwerpunkt3].filter(Boolean).length > 0) ? (
-        <ul className="list-disc pl-6 space-y-1">
-          {week.schwerpunkt1 && <li className="pl-1">{week.schwerpunkt1}</li>}
-          {week.schwerpunkt2 && <li className="pl-1">{week.schwerpunkt2}</li>}
-          {week.schwerpunkt3 && <li className="pl-1">{week.schwerpunkt3}</li>}
-        </ul>
-      ) : (
-        " –"
-      )}
-    </div>
+                {week && (
+                  <>
+                    <div className="text-base text-gray-200">
+                      <b>Schwerpunkte:</b>
+                      {([week.schwerpunkt1, week.schwerpunkt2, week.schwerpunkt3].filter(Boolean).length > 0) ? (
+                        <ul className="list-disc pl-6 space-y-1">
+                          {week.schwerpunkt1 && <li className="pl-1">{week.schwerpunkt1}</li>}
+                          {week.schwerpunkt2 && <li className="pl-1">{week.schwerpunkt2}</li>}
+                          {week.schwerpunkt3 && <li className="pl-1">{week.schwerpunkt3}</li>}
+                        </ul>
+                      ) : (
+                        " –"
+                      )}
+                    </div>
 
-    <p className="text-sm text-gray-400">
-      <b>Kader:</b> {d.spielerkader ?? "–"} Spieler, {week.torhueter ?? "–"} TW |{" "}
-      {week.einheit_dauer ?? "–"} Min
-    </p>
-  </>
-)}
+                    <p className="text-sm text-gray-400">
+                      <b>Kader:</b> {d.spielerkader ?? "–"} Spieler, {week.torhueter ?? "–"} TW |{" "}
+                      {week.einheit_dauer ?? "–"} Min
+                    </p>
+                  </>
+                )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  className="bg-blue-600 text-white"
-                  onClick={() => navigate(`/day/${d.id}`)}
-                >
-                  Ansehen
-                </Button>
-                <DeleteButton
-                  label="Löschen"
-                  onConfirm={async () => {
-                    const { error } = await supabase
-                      .from("day_plans")
-                      .delete()
-                      .eq("id", d.id);
-                    if (!error) setDays(days.filter((x) => x.id !== d.id));
-                  }}
-                />
-              </div>
+<div className="flex flex-col sm:flex-row gap-2">
+  {/* Training öffnen (Abschnitte) */}
+  <Button
+    className={`text-white ${
+      d.section_count > 0
+        ? "bg-green-600 hover:bg-green-700"
+        : "bg-gray-500 cursor-not-allowed"
+    }`}
+    disabled={d.section_count === 0}
+    onClick={() => d.section_count > 0 && navigate(`/day/${d.id}`)}
+  >
+    Training öffnen
+  </Button>
+
+  {/* Ansehen (Metadaten) */}
+  <Button
+    className="bg-gray-600 text-white"
+    onClick={() => navigate(`/daymeta/${d.id}`)}
+  >
+    Ansehen
+  </Button>
+
+  {/* Löschen */}
+  <DeleteButton
+    label="Löschen"
+    onConfirm={async () => {
+      const { error } = await supabase
+        .from("day_plans")
+        .delete()
+        .eq("id", d.id);
+      if (!error) setDays(days.filter((x) => x.id !== d.id));
+    }}
+  />
+</div>
             </div>
           ))}
         </div>

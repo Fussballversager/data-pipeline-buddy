@@ -17,7 +17,7 @@ import { DayOverview } from "@/pages/DayOverview";
 import { MonthDetail } from "@/pages/MonthDetail";
 import { WeekDetail } from "@/pages/WeekDetail";
 import { DayDetail } from "@/pages/DayDetail";
-
+import { DayMeta } from "@/pages/DayMeta";
 
 
 // Kleine Wrapper-Komponente für NavButton mit Icon
@@ -47,9 +47,9 @@ const App = () => (
     <nav className="flex gap-4 p-4 border-b border-gray-200 mb-6 bg-gray-50">
       <NavButton to="/dataform" label="Stammdaten" icon={User} />
       <NavButton to="/trainingform" label="Trainingsdaten" icon={Dumbbell} />
-      <NavButton to="/dashboard" label="Dashboard" icon={LayoutDashboard} />
+      <NavButton to="/dashboard" label="Dashboard Trainingsprogramme" icon={LayoutDashboard} />
       <NavButton to="/planmanager" label="Plan-Manager" icon={CalendarCheck} />
-      <NavButton to="/months" label="Monate" icon={CalendarCheck} />
+      <NavButton to="/months" label="Übersicht" icon={CalendarCheck} />
 
     </nav>
 
@@ -115,7 +115,8 @@ const App = () => (
       <Route path="/week/:weekId" element={<WeekDetail />} />
 
       <Route path="/days/:weekId" element={<DayOverview />} />
-     <Route path="/day/:dayId" element={<DayDetail />} />
+      <Route path="/day/:dayId" element={<DayDetail />} />
+      <Route path="/day-meta/:dayId" element={<DayMeta />} />
 
     </Routes>
   </BrowserRouter>

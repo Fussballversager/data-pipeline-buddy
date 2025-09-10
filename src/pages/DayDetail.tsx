@@ -45,8 +45,21 @@ export function DayDetail() {
 
   if (!day) return <div className="p-6 text-gray-200">⏳ Lade Trainingstag...</div>;
 
-  // Prüfen: gibt es 2,4,6? Dann ungerader Kader
-  const hasVariationSections = sections.some(sec => [2,4,6].includes(sec.abschnitt_nr));
+  // Prüfen, ob es parallele Abschnitte (2,4,6) gibt
+  const hasVariationSections = sections.some((sec) =>
+    [2, 4, 6].includes(sec.abschnitt_nr)
+  );
+
+  // Hilfsfunktion: trennt Strings in Bulletpoints
+  const renderList = (text: string | null, color: string) => (
+    <ul className={`list-disc pl-6 space-y-1 text-${color}-300`}>
+      {text
+        ? text.split(";").map((item, i) =>
+            item.trim() ? <li key={i}>{item.trim()}</li> : null
+          )
+        : <li>–</li>}
+    </ul>
+  );
 
   return (
     <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200 print-card">
@@ -75,10 +88,10 @@ export function DayDetail() {
 
           if (s.abschnitt_nr === 0) {
             title = `Warmup (${s.dauer ?? "–"} Min)`;
-          } else if ([1,2,3,4,5,6].includes(s.abschnitt_nr)) {
+          } else if ([1, 2, 3, 4, 5, 6].includes(s.abschnitt_nr)) {
             const spielformCount = sections
               .slice(0, idx + 1)
-              .filter(x => [1,2,3,4,5,6].includes(x.abschnitt_nr)).length;
+              .filter((x) => [1, 2, 3, 4, 5, 6].includes(x.abschnitt_nr)).length;
             title = `Spielform ${spielformCount} – ${s.spielform || "–"} (${s.dauer ?? "–"} Min)`;
           } else if (s.abschnitt_nr === 7) {
             title = `Abschlussspiel – ${s.spielform || "–"} (${s.dauer ?? "–"} Min)`;
@@ -88,8 +101,8 @@ export function DayDetail() {
             title = `${s.phase || "Abschnitt"} – ${s.spielform || "–"} (${s.dauer ?? "–"} Min)`;
           }
 
-          // 🔹 Kurz-Variante für 2,4,6
-          if ([2,4,6].includes(s.abschnitt_nr)) {
+          // 🔹 Parallele Spielformen 2,4,6 (nur bei ungeradem Kader)
+          if ([2, 4, 6].includes(s.abschnitt_nr)) {
             return (
               <div key={s.id} className="border rounded p-4 bg-gray-700 text-gray-100">
                 <h3 className="text-lg font-bold">{title}</h3>
@@ -97,29 +110,21 @@ export function DayDetail() {
                   <p className="text-sm text-gray-400">
                     Spieler: {s.hsf_spieler ?? "–"}
                   </p>
-                  {hasVariationSections && (
-                    <p className="parallel-hint text-sm">
-                      Parallel zu Spielform {s.abschnitt_nr - 1}
-                    </p>
-                  )}
+                  <p className="parallel-hint text-sm text-orange-400">
+                    Parallel zu Spielform {s.abschnitt_nr - 1}
+                  </p>
                 </div>
 
                 {/* Ablauf */}
                 <div className="mt-4">
                   <b>Ablauf:</b>
-                  <ul className="list-disc list-indent space-y-1 text-blue-300">
-                    {s.ablauf
-                      ? s.ablauf.split(";").map((step, i) =>
-                          step.trim() && <li key={i}>{step.trim()}</li>
-                        )
-                      : <li>–</li>}
-                  </ul>
+                  {renderList(s.ablauf, "blue")}
                 </div>
               </div>
             );
           }
 
-          // 🔹 Normale Darstellung für alle anderen Abschnitte
+          // 🔹 Normale Abschnitte
           return (
             <div key={s.id} className="border rounded p-4 bg-gray-700 text-gray-100">
               <h3 className="text-lg font-bold">{title}</h3>
@@ -127,13 +132,13 @@ export function DayDetail() {
                 <p className="text-sm text-gray-400">
                   Spieler: {s.hsf_spieler ?? "–"}
                 </p>
-                {[1,3,5].includes(s.abschnitt_nr) && (
+                {[1, 3, 5].includes(s.abschnitt_nr) && (
                   hasVariationSections ? (
-                    <p className="parallel-hint text-sm">
+                    <p className="parallel-hint text-sm text-orange-400">
                       Parallel zu Spielform {s.abschnitt_nr + 1}
                     </p>
                   ) : (
-                    <p className="parallel-hint text-sm">
+                    <p className="parallel-hint text-sm text-orange-400">
                       Parallel auf 2 Feldern (Kader geteilt)
                     </p>
                   )
@@ -143,66 +148,36 @@ export function DayDetail() {
               {/* Organisation */}
               <div>
                 <b>Organisation:</b>
-                <ul className="list-disc list-indent space-y-1 text-gray-200">
-                  {s.organisation
-                    ? s.organisation.split(";").map((item, i) =>
-                        item.trim() && <li key={i}>{item.trim()}</li>
-                      )
-                    : <li>–</li>}
-                </ul>
+                {renderList(s.organisation, "gray")}
               </div>
 
               {/* Ablauf */}
               <div className="mt-4">
                 <b>Ablauf:</b>
-                <ul className="list-disc list-indent space-y-1 text-blue-300">
-                  {s.ablauf
-                    ? s.ablauf.split(";").map((step, i) =>
-                        step.trim() && <li key={i}>{step.trim()}</li>
-                      )
-                    : <li>–</li>}
-                </ul>
+                {renderList(s.ablauf, "blue")}
               </div>
 
-              {/* Zielerfolg nur bei 1–6 */}
-              {[1,3,5].includes(s.abschnitt_nr) && (
+              {/* Zielerfolg */}
+              {[1, 3, 5].includes(s.abschnitt_nr) && (
                 <div className="mt-4">
                   <b>Zielerfolg:</b>
-                  <ul className="list-disc list-indent space-y-1 text-yellow-300">
-                    {s.zielerfolg
-                      ? s.zielerfolg.split(";").map((line, i) =>
-                          line.trim() && <li key={i}>{line.trim()}</li>
-                        )
-                      : <li>–</li>}
-                  </ul>
+                  {renderList(s.zielerfolg, "yellow")}
                 </div>
               )}
 
-              {/* Coachingpunkte nur wenn nicht Warmup oder Cooldown */}
-              {[1,3,5,7].includes(s.abschnitt_nr) && (
+              {/* Coachingpunkte */}
+              {[1, 3, 5, 7].includes(s.abschnitt_nr) && (
                 <div className="mt-4">
                   <b>Coachingpunkte:</b>
-                  <ul className="list-disc list-indent space-y-1 text-green-300">
-                    {s.coachingpunkte
-                      ? s.coachingpunkte.split(";").map((line, i) =>
-                          line.trim() && <li key={i}>{line.trim()}</li>
-                        )
-                      : <li>–</li>}
-                  </ul>
+                  {renderList(s.coachingpunkte, "green")}
                 </div>
               )}
 
-              {/* Varianten nur wenn nicht Warmup oder Cooldown */}
-              {[1,3,5,7].includes(s.abschnitt_nr) && (
+              {/* Varianten */}
+              {[1, 3, 5, 7].includes(s.abschnitt_nr) && (
                 <div className="mt-4">
                   <b>Varianten:</b>
-                  <ul className="list-disc list-indent space-y-1 text-purple-300">
-                    {s.varianten
-                      ? s.varianten.split(";").map((line, i) =>
-                          line.trim() && <li key={i}>{line.trim()}</li>
-                        )
-                      : <li>–</li>}
-                  </ul>
+                  {renderList(s.varianten, "purple")}
                 </div>
               )}
             </div>
@@ -212,7 +187,7 @@ export function DayDetail() {
         {/* Aktionen */}
         <div className="mt-6 flex gap-4">
           <Button
-            className="bg-green-700 hover:bg-green-600 text-white"
+            className="bg-green-600 hover:bg-green-700 text-white"
             onClick={() => window.print()}
           >
             Als PDF exportieren
