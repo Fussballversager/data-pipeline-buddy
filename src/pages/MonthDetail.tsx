@@ -41,7 +41,7 @@ export function MonthDetail() {
         <section>
           <h3 className="text-lg font-semibold text-gray-100 mb-2">Ziele & Inhalte</h3>
           <p className="text-base text-gray-200"><b>Fokus:</b> {month.fokus || "–"}</p>
-          <p className="text-base text-gray-200"><b>Schwachstellen:</b> {month.schwachstellen || "–"}</p>
+          <p className="text-base text-gray-200"><b>Schwerpunkte:</b> {month.schwachstellen || "–"}</p>
           <p className="text-base text-gray-200"><b>Notizen:</b> {month.notizen || "–"}</p>
         </section>
 

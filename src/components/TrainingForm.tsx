@@ -127,7 +127,7 @@ export function TrainingForm() {
           notizen: form.notizen,
         },
       ],
-      { onConflict: ["user_id"] } // überschreibt statt neu
+      { onConflict: "user_id" } // überschreibt statt neu
     );
 
     setLoading(false);
@@ -261,7 +261,7 @@ export function TrainingForm() {
         </Select>
       </div>
       <div>
-        <Label>Schwachstellen</Label>
+        <Label>Schwerpunkte</Label>
         <Textarea
           value={form.schwachstellen}
           onChange={(e) => handleChange("schwachstellen", e.target.value)}

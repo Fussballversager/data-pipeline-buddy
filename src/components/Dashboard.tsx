@@ -141,14 +141,16 @@ export function Dashboard() {
                             Ansehen
                           </Button>
                         </Link>
-                        <Link to={`/days/${p.id}`}>
-                          <Button
-                            size="sm"
-                            className="bg-blue-600 text-white hover:bg-blue-500"
-                          >
-                            Tage öffnen
-                          </Button>
-                        </Link>
+                        {p.day_count > 0 && (
+                          <Link to={`/days/${p.id}`}>
+                            <Button
+                              size="sm"
+                              className="bg-blue-600 text-white hover:bg-blue-500"
+                            >
+                              Tage öffnen
+                            </Button>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   );

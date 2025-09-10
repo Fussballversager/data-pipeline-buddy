@@ -58,7 +58,7 @@ export function PlanManager() {
 
       // Wochenpläne laden
       const { data: weeks } = await supabase
-        .from("week_plans")
+        .from("view_week_plans")
         .select("*")
         .eq("user_id", userId)
         .order("calendar_week", { ascending: true });
@@ -184,7 +184,6 @@ export function PlanManager() {
                       overrideAltersstufe,
                       overrideSpielerkader,
                     }}
-                    disabled={!!p.last_run_at}
                   />
                 )}
               </li>
@@ -240,7 +239,6 @@ export function PlanManager() {
                         overrideAltersstufe,
                         overrideSpielerkader,
                       }}
-                      disabled={!!p.last_run_at}
                     />
                   )}
                 </li>
@@ -279,7 +277,6 @@ export function PlanManager() {
                       overrideAltersstufe,
                       overrideSpielerkader,
                     }}
-                    disabled={!!p.last_run_at}
                   />
                 )}
               </li>

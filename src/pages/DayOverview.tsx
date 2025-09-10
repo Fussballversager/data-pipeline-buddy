@@ -70,20 +70,27 @@ export function DayOverview() {
                 <p className="text-base text-gray-200">
                   <b>Ziel:</b> {d.trainingsziel || "–"}
                 </p>
-                {week && (
-                  <>
-                    <p className="text-base text-gray-200">
-                      <b>Schwerpunkte:</b>{" "}
-                      {[week.schwerpunkt1, week.schwerpunkt2, week.schwerpunkt3]
-                        .filter(Boolean)
-                        .join(", ") || "–"}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      <b>Kader:</b> {d.spielerkader ?? "–"} Spieler,{" "}
-                      {week.torhueter ?? "–"} TW | {week.einheit_dauer ?? "–"} Min
-                    </p>
-                  </>
-                )}
+{week && (
+  <>
+    <div className="text-base text-gray-200">
+      <b>Schwerpunkte:</b>
+      {([week.schwerpunkt1, week.schwerpunkt2, week.schwerpunkt3].filter(Boolean).length > 0) ? (
+        <ul className="list-disc pl-6 space-y-1">
+          {week.schwerpunkt1 && <li className="pl-1">{week.schwerpunkt1}</li>}
+          {week.schwerpunkt2 && <li className="pl-1">{week.schwerpunkt2}</li>}
+          {week.schwerpunkt3 && <li className="pl-1">{week.schwerpunkt3}</li>}
+        </ul>
+      ) : (
+        " –"
+      )}
+    </div>
+
+    <p className="text-sm text-gray-400">
+      <b>Kader:</b> {d.spielerkader ?? "–"} Spieler, {week.torhueter ?? "–"} TW |{" "}
+      {week.einheit_dauer ?? "–"} Min
+    </p>
+  </>
+)}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2">

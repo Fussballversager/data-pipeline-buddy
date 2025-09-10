@@ -81,12 +81,18 @@ export function WeekOverview() {
                 <p className="text-base text-gray-200">
                   <b>Ziel:</b> {w.trainingsziel || "–"}
                 </p>
-                <p className="text-base text-gray-200">
-                  <b>Schwerpunkte:</b>{" "}
-                  {[w.schwerpunkt1, w.schwerpunkt2, w.schwerpunkt3]
-                    .filter(Boolean)
-                    .join(", ") || "–"}
-                </p>
+<div className="text-base text-gray-200">
+  <b>Schwerpunkte:</b>
+  {([w.schwerpunkt1, w.schwerpunkt2, w.schwerpunkt3].filter(Boolean).length > 0) ? (
+    <ul className="list-disc pl-6 space-y-1">
+      {w.schwerpunkt1 && <li className="pl-1">{w.schwerpunkt1}</li>}
+      {w.schwerpunkt2 && <li className="pl-1">{w.schwerpunkt2}</li>}
+      {w.schwerpunkt3 && <li className="pl-1">{w.schwerpunkt3}</li>}
+    </ul>
+  ) : (
+    " –"
+  )}
+</div>
                 <p className="text-sm text-gray-400">
                   <b>Kader:</b> {w.spielerkader ?? "–"} Spieler,{" "}
                   {w.torhueter ?? "–"} TW | {w.einheit_dauer ?? "–"} Min
@@ -112,7 +118,7 @@ export function WeekOverview() {
                   label="Löschen"
                   onConfirm={async () => {
                     const { error } = await supabase
-                      .from("week_plans")
+                      .from("view_week_plans")
                       .delete()
                       .eq("id", w.id);
                     if (error) {

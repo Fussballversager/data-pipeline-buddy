@@ -77,7 +77,7 @@ export function MonthOverview() {
                 </h3>
                 <p className="text-base text-gray-200">
                   <b>Fokus:</b> {m.fokus || "–"} |{" "}
-                  <b>Schwachstellen:</b> {m.schwachstellen || "–"}
+                  <b>Schwerpunkte:</b> {m.schwachstellen || "–"}
                 </p>
                 <p className="text-sm text-gray-400">
                   Kader: {m.spielerkader ?? "–"} | TW: {m.torhueter ?? "–"} |{" "}

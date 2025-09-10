@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfWeek, format } from "date-fns";
+import { format } from "date-fns";
 
 // Hilfsfunktionen für aktuelle Zeitkontexte
 function getCurrentMonth() {
@@ -8,7 +8,6 @@ function getCurrentMonth() {
 }
 
 function getCurrentCalendarWeek() {
-  // aktuelle ISO-Woche berechnen
   return format(new Date(), "I"); // KW, z. B. "35"
 }
 
@@ -38,7 +37,7 @@ export function usePlans() {
       }
       const userId = userData.user.id;
 
-      // Alle Monatspläne
+      // Monatspläne
       const { data: months, error: mErr } = await supabase
         .from("month_plans")
         .select("*")
@@ -47,35 +46,36 @@ export function usePlans() {
       if (mErr) console.error("❌ Fehler beim Laden month_plans:", mErr);
       setAllMonthPlans(months || []);
 
-      // Alle Wochenpläne
+      // Wochenpläne
       const { data: weeks, error: wErr } = await supabase
-        .from("week_plans")
+        .from("view_week_plans")
         .select("*")
         .eq("user_id", userId)
         .order("calendar_week", { ascending: true });
       if (wErr) console.error("❌ Fehler beim Laden week_plans:", wErr);
       setAllWeekPlans(weeks || []);
 
-      // Alle Tagespläne
+      // Tagespläne nur wenn section_count > 0
       const { data: days, error: dErr } = await supabase
-        .from("day_plans")
+        .from("view_day_plans")
         .select("*")
         .eq("user_id", userId)
+        .gt("section_count", 0) // ✅ nur Tage mit mindestens 1 Section
         .order("training_date", { ascending: true });
       if (dErr) console.error("❌ Fehler beim Laden day_plans:", dErr);
       setAllDayPlans(days || []);
 
-      // Aktuellen Monat suchen
+      // Aktueller Monat
       const thisMonth = getCurrentMonth();
       const currentMonth = (months || []).find((m) => m.month_year === thisMonth);
       setCurrentMonthPlan(currentMonth || null);
 
-      // Aktuelle Woche suchen
+      // Aktuelle Woche
       const thisWeek = getCurrentCalendarWeek();
       const currentWeek = (weeks || []).find((w) => String(w.calendar_week) === thisWeek);
       setCurrentWeekPlan(currentWeek || null);
 
-      // Aktueller Tag suchen
+      // Aktueller Tag
       const today = getToday();
       const currentDay = (days || []).find((d) => d.training_date === today);
       setCurrentDayPlan(currentDay || null);
