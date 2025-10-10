@@ -26,18 +26,20 @@ export function PhoneFrameChrome({
 
   return (
     <div
-      className={`${base} ${className}`}
-      style={{
-        aspectRatio: ratio as any, // z.B. 1/2
-        paddingTop: notch ? safeTop : 0,
-        paddingBottom: homeButton ? safeBottom : 0,
-      }}
-    >
-      {/* Innen-Ring für Silhouette */}
-      <div className="pointer-events-none absolute inset-0 rounded-[26px] ring-1 ring-black/70/60" />
+      className={`phone-frame ${base} ${className}`}
+
+       style={{
+         aspectRatio: ratio as any,
+         paddingTop: notch ? safeTop : 0,
+         paddingBottom: homeButton ? safeBottom : 0,
+       }}
+     >
+       {/* Innen-Ring für Silhouette */}
+       <div className="pointer-events-none absolute inset-0 rounded-[26px] ring-1 ring-black/70/60" />
+
 
       {/* Inhalt */}
-      <div className="relative h-full w-full">{children}</div>
+      <div className="phone-frame__content relative h-full w-full">{children}</div>
 
       {/* Notch */}
       {notch && (

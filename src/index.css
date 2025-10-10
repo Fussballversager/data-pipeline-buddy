@@ -2,10 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-  /* Seitenränder A4 */
-  @page {
-    margin: 15mm;
-  }
+/* Seitenränder A4 (Top-Level, nicht in @media print) */
+@page {
+  size: A4;
+  margin: 15mm;
+}
 
 /* Design-System: alle Farben etc. */
 @layer base {
@@ -92,21 +93,31 @@
   list-style-position: outside;
   margin-left: 1.5em;
 }
+
 .list-indent li {
   padding-left: 0.5em;
   text-indent: 0;
 }
 
-/* Styling für Parallel-Hinweis */
+/* Styling für Parallel-Hinweis (Screen) */
 .parallel-hint {
-  color: #fb923c; /* orange */
+  color: #fb923c;
   font-weight: 600;
 }
 
 /* --- Druck/PDF Styles --- */
 @media print {
-  body { color: #111 !important; }
-  h1, h2, h3, h4, h5, h6 {
+  body {
+    color: #111 !important;
+    background: white !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: #000 !important;
   }
 
@@ -118,32 +129,93 @@
   }
 
   /* Farbbereiche kräftig */
-  .text-blue-300   { color: #1d4ed8 !important; }  /* Ablauf */
-  .text-yellow-300 { color: #b45309 !important; }  /* Zielerfolg */
-  .text-green-300  { color: #166534 !important; }  /* Coaching */
-  .text-purple-300 { color: #6b21a8 !important; }  /* Varianten */
+  .text-blue-300 {
+    color: #1d4ed8 !important;
+  }
+
+  /* Ablauf */
+  .text-yellow-300 {
+    color: #b45309 !important;
+  }
+
+  /* Zielerfolg */
+  .text-green-300 {
+    color: #166534 !important;
+  }
+
+  /* Coaching */
+  .text-purple-300 {
+    color: #6b21a8 !important;
+  }
+
+  /* Varianten */
 
   /* Parallel-Hinweis auffällig */
   .parallel-hint {
     color: #c2410c !important;
     font-size: 0.95rem;
     font-weight: 700;
-    background: #fff3e0 !important;  /* hellorange Hintergrund */
+    background: #fff3e0 !important;
     border: 1px solid #c2410c;
     padding: 2px 6px;
     border-radius: 4px;
   }
 
-  /* Boxen klar abtrennen */
+  /* ===== PhoneFrame ⟶ SVG vertikal mittig (nur Übersicht) ===== */
+  .sketches-overview .phone-frame {
+    overflow: hidden !important;
+    position: relative;
+  }
+
+  .sketches-overview .phone-frame__content {
+    display: grid !important;
+    place-items: center !important;
+    /* ⟵ zentriert horizontal + vertikal */
+  }
+
+  .sketches-overview .phone-frame__content>svg {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    transform: none !important;
+    /* evtl. frühere translateY aufheben */
+  }
+
+  /* Hilfs-Klassen für Print */
   .print-section {
     border: 1px solid #ccc !important;
     padding: 12px !important;
     margin-bottom: 12px !important;
     border-radius: 6px !important;
   }
-  /* Hilfs-Klassen für Print */
-  .print-section { border: 1px solid #ccc !important; padding: 12px !important; margin-bottom: 12px !important; border-radius: 6px !important; }
-  .break-inside-avoid { break-inside: avoid; }
+
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  .avoid-break-strong {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-before: auto;
+    break-after: auto;
+  }
+
+  .page-break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .print-reset-float {
+    float: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .print-gap-sm {
+    margin-bottom: 10px !important;
+    padding-bottom: 10px !important;
+  }
 
   /* Buttons & Navigation ausblenden */
   button,
@@ -151,9 +223,45 @@
     display: none !important;
   }
 
-  /* Überschriften im PDF etwas größer */
-  .print-section h3 {
-    font-size: 1.2rem !important;
-    margin-bottom: 8px !important;
+  /* Card-Breite im Satzspiegel halten */
+  .print-card {
+    width: auto !important;
+    max-width: 180mm !important;
+    /* 210mm - 2×15mm Rand */
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: white !important;
+    border: 0 !important;
+    box-shadow: none !important;
   }
+
+  /* Medienelemente sicher skalieren */
+  img,
+  svg,
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Optionales Ausblenden einzelner UI-Teile */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Zentriere das Bild im Rahmen in der Übersicht (Print) */
+  .sketches-overview .ratio-box {
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .sketches-overview .ratio-box>img {
+    position: static !important;
+    /* absolute aufheben */
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+
 }

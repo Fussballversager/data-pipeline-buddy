@@ -79,32 +79,32 @@ const App = () => (
 
       {/* Catch-all */}
       <Route path="*" element={<div>Not Found</div>} />
-     <Route
-      path="/dashboard"
-      element={
-       <AuthWrapper>
-       <Dashboard />
-       </AuthWrapper>
-      }
+      <Route
+        path="/dashboard"
+        element={
+          <AuthWrapper>
+            <Dashboard />
+          </AuthWrapper>
+        }
       />
 
       <Route
         path="/planmanager"
         element={
-         <AuthWrapper>
-         <PlanManager />
-         </AuthWrapper>
+          <AuthWrapper>
+            <PlanManager />
+          </AuthWrapper>
         }
       />
 
-    <Route
-     path="/plans/:type/:id"
-      element={
-        <AuthWrapper>
-         <PlanViewer />
-         </AuthWrapper>
-    }
-     />
+      <Route
+        path="/plans/:type/:id"
+        element={
+          <AuthWrapper>
+            <PlanViewer />
+          </AuthWrapper>
+        }
+      />
 
       <Route path="/plans/day/:id" element={<DayPlanPage />} />
 
