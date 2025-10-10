@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+  /* Seitenränder A4 */
+  @page {
+    margin: 15mm;
+  }
+
 /* Design-System: alle Farben etc. */
 @layer base {
   :root {
@@ -100,10 +105,7 @@
 
 /* --- Druck/PDF Styles --- */
 @media print {
-  body {
-    color: #111 !important;
-  }
-
+  body { color: #111 !important; }
   h1, h2, h3, h4, h5, h6 {
     color: #000 !important;
   }
@@ -139,6 +141,9 @@
     margin-bottom: 12px !important;
     border-radius: 6px !important;
   }
+  /* Hilfs-Klassen für Print */
+  .print-section { border: 1px solid #ccc !important; padding: 12px !important; margin-bottom: 12px !important; border-radius: 6px !important; }
+  .break-inside-avoid { break-inside: avoid; }
 
   /* Buttons & Navigation ausblenden */
   button,
@@ -150,10 +155,5 @@
   .print-section h3 {
     font-size: 1.2rem !important;
     margin-bottom: 8px !important;
-  }
-
-  /* Seitenränder A4 */
-  @page {
-    margin: 15mm;
   }
 }

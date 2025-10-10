@@ -64,13 +64,19 @@ export function DayDetail() {
   );
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200 print-card">
+    <Card
+      className="
+        max-w-4xl mx-auto p-6 space-y-6 bg-gray-800 text-gray-200 print-card
+        print:w-[210mm] print:max-w-none print:mx-0 print:p-0
+        print:bg-white print:text-black print:border-0 print:shadow-none
+      "
+    >
       {/* Header */}
-      <CardHeader className="border-b border-gray-700 pb-4">
-        <CardTitle className="text-xl font-bold text-gray-100">
+      <CardHeader className="border-b border-gray-700 pb-4 print:border-gray-300">
+        <CardTitle className="text-xl font-bold text-gray-100 print:text-black">
           Trainingstag {day.training_date}
         </CardTitle>
-        <p className="text-gray-300 mt-1">
+        <p className="text-gray-300 mt-1 print:text-black">
           Ziel: {day.trainingsziel || "–"}
         </p>
       </CardHeader>
@@ -106,68 +112,82 @@ export function DayDetail() {
           // 🔹 Parallele Spielformen 2,4,6 (nur bei ungeradem Kader)
           if ([2, 4, 6].includes(s.abschnitt_nr)) {
             return (
-              <div key={s.id} className="border rounded p-4 bg-gray-700 text-gray-100">
-                <h3 className="text-lg font-bold">{title}</h3>
+              <div
+                key={s.id}
+                className="
+                  border rounded p-4 bg-gray-700 text-gray-100
+                  print:border print:border-gray-300 print:bg-white print:text-black
+                "
+              >
+                <h3 className="text-lg font-bold print:text-black">{title}</h3>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-400 print:text-black">
                     Spieler: {s.hsf_spieler ?? "–"}
                   </p>
-                  <p className="parallel-hint text-sm text-orange-400">
+                  <p className="parallel-hint text-sm text-orange-400 print:text-black">
                     Parallel zu Spielform {s.abschnitt_nr - 1}
                   </p>
                 </div>
-<div className="w-full md:w-[22rem] md:float-right md:mb-2 md:ml-2 md:mr-[-24px] lg:w-[24rem] lg:ml-2 lg:mr-[-24px]">
-  <SectionSketchInline
-    sectionId={s.id}
-    abschnittNr={s.abschnitt_nr}
-    heightClass="h-[22rem]"
-  />
-</div>
-              {/* Organisation */}
-              <div>
-                <b>Organisation:</b>
-                {renderList(s.organisation, "gray")}
-              </div>
+
+                <div className="w-full md:w-[22rem] md:float-right md:mb-2 md:ml-2 md:mr-[-24px] lg:w-[24rem] lg:ml-2 lg:mr-[-24px]">
+                  <SectionSketchInline
+                    sectionId={s.id}
+                    abschnittNr={s.abschnitt_nr}
+                    heightClass="h-[22rem]"
+                  />
+                </div>
+
+                {/* Organisation */}
+                <div>
+                  <b>Organisation:</b>
+                  {renderList(s.organisation, "gray")}
+                </div>
 
                 {/* Ablauf */}
                 <div className="mt-4">
                   <b>Ablauf:</b>
                   {renderList(s.ablauf, "blue")}
                 </div>
-              <div className="clear-both" />
 
-
+                <div className="clear-both" />
               </div>
             );
           }
 
           // 🔹 Normale Abschnitte
           return (
-            <div key={s.id} className="border rounded p-4 bg-gray-700 text-gray-100">
-              <h3 className="text-lg font-bold">{title}</h3>
+            <div
+              key={s.id}
+              className="
+                border rounded p-4 bg-gray-700 text-gray-100
+                print:border print:border-gray-300 print:bg-white print:text-black
+              "
+            >
+              <h3 className="text-lg font-bold print:text-black">{title}</h3>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-400 print:text-black">
                   Spieler: {s.hsf_spieler ?? "–"}
                 </p>
                 {[1, 3, 5].includes(s.abschnitt_nr) && (
                   hasVariationSections ? (
-                    <p className="parallel-hint text-sm text-orange-400">
+                    <p className="parallel-hint text-sm text-orange-400 print:text-black">
                       Parallel zu Spielform {s.abschnitt_nr + 1}
                     </p>
                   ) : (
-                    <p className="parallel-hint text-sm text-orange-400">
+                    <p className="parallel-hint text-sm text-orange-400 print:text-black">
                       Parallel auf 2 Feldern (Kader geteilt)
                     </p>
                   )
                 )}
               </div>
-<div className="w-full lg:w-80 lg:float-right lg:ml-4 lg:mb-2">
-  <SectionSketchInline
-    sectionId={s.id}
-    abschnittNr={s.abschnitt_nr}
-    heightClass="h-[22rem]"
-  />
-</div>
+
+              <div className="w-full lg:w-80 lg:float-right lg:ml-4 lg:mb-2">
+                <SectionSketchInline
+                  sectionId={s.id}
+                  abschnittNr={s.abschnitt_nr}
+                  heightClass="h-[22rem]"
+                />
+              </div>
 
               {/* Organisation */}
               <div>
@@ -204,15 +224,16 @@ export function DayDetail() {
                   {renderList(s.varianten, "purple")}
                 </div>
               )}
-<div className="clear-both" />
 
+              <div className="clear-both" />
             </div>
           );
         })}
+
         <SketchesSection sections={sections} />
 
         {/* Aktionen */}
-        <div className="mt-6 flex gap-4">
+        <div className="mt-6 flex gap-4 print:hidden">
           <Button
             className="bg-green-600 hover:bg-green-700 text-white"
             onClick={() => window.print()}
@@ -220,15 +241,14 @@ export function DayDetail() {
             Als PDF exportieren
           </Button>
 
-          <Link
-            to={`/days/${day.week_plan_id}`}
-            className="text-blue-400 hover:text-blue-200 underline self-center no-print"
-          >
-            ← Zurück zu Tagen
-          </Link>
+            <Link
+              to={`/days/${day.week_plan_id}`}
+              className="text-blue-400 hover:text-blue-200 underline self-center no-print"
+            >
+              ← Zurück zu Tagen
+            </Link>
         </div>
       </CardContent>
     </Card>
   );
 }
-
