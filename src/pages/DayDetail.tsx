@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BreadcrumbNav } from "@/components/BreadcrumbNav";
 import { Button } from "@/components/ui/button";
+import SketchesSection from "@/components/SketchesSection";
+import { SectionSketchInline } from "@/components/SectionSketchInline";
 
 export function DayDetail() {
   const { dayId } = useParams();
@@ -114,12 +116,27 @@ export function DayDetail() {
                     Parallel zu Spielform {s.abschnitt_nr - 1}
                   </p>
                 </div>
+<div className="w-full md:w-[22rem] md:float-right md:mb-2 md:ml-2 md:mr-[-24px] lg:w-[24rem] lg:ml-2 lg:mr-[-24px]">
+  <SectionSketchInline
+    sectionId={s.id}
+    abschnittNr={s.abschnitt_nr}
+    heightClass="h-[22rem]"
+  />
+</div>
+              {/* Organisation */}
+              <div>
+                <b>Organisation:</b>
+                {renderList(s.organisation, "gray")}
+              </div>
 
                 {/* Ablauf */}
                 <div className="mt-4">
                   <b>Ablauf:</b>
                   {renderList(s.ablauf, "blue")}
                 </div>
+              <div className="clear-both" />
+
+
               </div>
             );
           }
@@ -144,6 +161,13 @@ export function DayDetail() {
                   )
                 )}
               </div>
+<div className="w-full lg:w-80 lg:float-right lg:ml-4 lg:mb-2">
+  <SectionSketchInline
+    sectionId={s.id}
+    abschnittNr={s.abschnitt_nr}
+    heightClass="h-[22rem]"
+  />
+</div>
 
               {/* Organisation */}
               <div>
@@ -180,9 +204,12 @@ export function DayDetail() {
                   {renderList(s.varianten, "purple")}
                 </div>
               )}
+<div className="clear-both" />
+
             </div>
           );
         })}
+        <SketchesSection sections={sections} />
 
         {/* Aktionen */}
         <div className="mt-6 flex gap-4">
@@ -204,3 +231,4 @@ export function DayDetail() {
     </Card>
   );
 }
+
