@@ -123,7 +123,7 @@ export function PlanManager() {
 
     try {
       const response = await fetch(
-        "https://hook.eu2.make.com/jr6wvnrr27mc7wr0r73pkstjb2o75z5p",
+        "https://hook.eu2.make.com/x0ec5ntg8y8sqcl94nqeh6u57tqmnwg1",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

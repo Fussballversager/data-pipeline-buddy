@@ -130,7 +130,7 @@ export function DataForm() {
       </div>
 
       <Button onClick={handleSave} disabled={loading}>
-        {loading ? "Speichert..." : "Speichern"}
+        {loading ? "Speichern..." : "Speichern"}
       </Button>
 
       {message && <p className="mt-2">{message}</p>}
