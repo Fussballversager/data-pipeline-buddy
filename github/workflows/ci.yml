@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    if: ${{ github.event.pull_request.draft == true || github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: |
+          if pnpm run -s typecheck; then
+            echo "TYPECHECK=passed" >> $GITHUB_ENV
+          else
+            echo "TYPECHECK=failed" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Lint
+        run: pnpm exec eslint . --ext .ts,.tsx,.js,.jsx
+
+      - name: Build (with sourcemap)
+        run: pnpm run build -- --sourcemap
+
+      # ---- Start preview server for audits (Vite: preview on 4173) ----
+      - name: Start preview server
+        run: |
+          (pnpm exec vite preview --strictPort --port 4173 &) 
+          npx wait-on -t 60000 http://localhost:4173
+
+      # ---- Accessibility (axe) on a few routes (adjust URLs) ----
+      - name: Axe accessibility checks
+        run: npx @axe-core/cli http://localhost:4173/ http://localhost:4173/day/123 --timeout 60000 --exit
+
+      # ---- Lighthouse (desktop) against local preview ----
+      - name: Install Lighthouse CLI
+        run: pnpm dlx -y @lhci/cli@0.13.0 --help > /dev/null
+
+      - name: Lighthouse desktop
+        run: pnpm dlx @lhci/cli autorun --collect.url=http://localhost:4173/ --collect.settings.preset=desktop --upload.target=filesystem
+
+      - name: Archive reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            .lighthouseci
