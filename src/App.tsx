@@ -18,38 +18,54 @@ import { MonthDetail } from "@/pages/MonthDetail";
 import { WeekDetail } from "@/pages/WeekDetail";
 import { DayDetail } from "@/pages/DayDetail";
 import { DayMeta } from "@/pages/DayMeta";
-
+import { Tooltip,TooltipContent, TooltipProvider, TooltipTrigger,} from "@/components/ui/tooltip";
 
 // Kleine Wrapper-Komponente für NavButton mit Icon
-function NavButton({ to, label, icon: Icon }: { to: string; label: string; icon: any }) {
+function NavButton({
+  to,
+  label,
+  icon: Icon,
+  tooltip,
+}: {
+  to: string;
+  label: string;
+  icon: any;
+  tooltip?: string;
+}) {
   const location = useLocation();
   const isActive = location.pathname === to;
 
   return (
-    <Link to={to}>
-      <Button
-        className={
-          isActive
-            ? "bg-green-700 text-white flex items-center gap-2"
-            : "bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-        }
-      >
-        <Icon className="w-4 h-4" />
-        {label}
-      </Button>
-    </Link>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link to={to}>
+            <Button
+              className={
+                isActive
+                  ? "bg-green-700 text-white flex items-center gap-2"
+                  : "bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              }
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </Button>
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent>{tooltip ?? label}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
-
 const App = () => (
   <BrowserRouter>
     {/* Navigation */}
     <nav className="flex gap-4 p-4 border-b border-gray-200 mb-6 bg-gray-50">
-      <NavButton to="/dataform" label="Stammdaten" icon={User} />
-      <NavButton to="/trainingform" label="Trainingsdaten" icon={Dumbbell} />
-      <NavButton to="/dashboard" label="Dashboard Trainingsprogramme" icon={LayoutDashboard} />
-      <NavButton to="/planmanager" label="Plan-Manager" icon={CalendarCheck} />
-      <NavButton to="/months" label="Übersicht" icon={CalendarCheck} />
+      <NavButton to="/dataform" label="Stammdaten" tooltip="Eingeben von Trainer, Verein, Team" icon={User} />
+      <NavButton to="/trainingform" label="Teamdaten und Spielidee" tooltip="Deine Philosophie, Ziele, Schwerpunkte und Fokus-Themen" icon={Dumbbell} />
+      <NavButton to="/planmanager" label="Training Planen" tooltip="Hier werden die Monats-, Wochen- und Tagesprogramm geplant" icon={CalendarCheck} />
+      <NavButton to="/dashboard" label="Dashboard Tagesprogramme" tooltip="Alle vorhandenen Tagesprogramme aufgelistet, mit allen Inhalten und Skizzen" icon={LayoutDashboard} />
+      <NavButton to="/months" label="Übersicht Monat, Woche, Tag" tooltip="Logik von Monatsplan bis zum Tagesplan, Möglichkeit Pläne zu löschen" icon={CalendarCheck} />
 
     </nav>
 

@@ -2,24 +2,53 @@ import React, { useState } from "react";
 import { mapPlanToPayload } from "@/utils/mapPlanToPayload";
 import { supabase } from "@/integrations/supabase/client";
 
-type TechType = "month" | "week" | "day";
-type LabelTyp = "Monat" | "Woche" | "Tag";
+// NEU: Polling-Check je nach Typ
+async function checkPlanReady(plan: any, type: "month" | "week" | "day") {
+  if (type === "month") {
+    const { data } = await supabase
+      .from("view_week_plans")
+      .select("id")
+      .eq("month_plan_id", plan.id);
+    return data && data.length > 0;
+  }
 
-interface Props {
-  plan: any;
-  /** Technischer Typ für Logik / Tabellenwahl */
-  type: TechType;
-  /** Optional: Deutsches Label nur für Payload/UI; wenn nicht gesetzt, wird aus `type` gemappt */
-  typ?: LabelTyp;
-  submission?: any;
-  overrides?: {
-    overridePhilosophie?: string | null;
-    overrideAltersstufe?: string | null;
-    overrideSpielerkader?: number | null;
-  };
+  if (type === "week") {
+    const { data } = await supabase
+      .from("day_plans")
+      .select("id")
+      .eq("week_plan_id", plan.id);
+    return data && data.length > 0;
+  }
+
+  if (type === "day") {
+    const { data } = await supabase
+      .from("viz_section_package")
+      .select("id")
+      .eq("day_plan_id", plan.id);
+    return data && data.length > 0;
+  }
+
+  return false;
 }
 
-const TYPE_TO_LABEL: Record<TechType, LabelTyp> = {
+async function waitForPlanData(plan: any, type: "month" | "week" | "day", setMessage: (msg: string) => void) {
+  setMessage("⏳ Warte auf Verarbeitung …");
+  const maxAttempts = 20;
+  const delay = 6000;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const ready = await checkPlanReady(plan, type);
+    if (ready) {
+      setMessage("✅ Fertig verarbeitet!");
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
+  setMessage("⚠️ Keine Antwort – bitte später prüfen.");
+}
+
+const TYPE_TO_LABEL = {
   month: "Monat",
   week: "Woche",
   day: "Tag",
@@ -31,9 +60,9 @@ export default function SendToMakeButton({
   typ,
   submission,
   overrides,
-}: Props) {
+}) {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState(null);
 
   const handleSend = async () => {
     setLoading(true);
@@ -41,10 +70,7 @@ export default function SendToMakeButton({
 
     try {
       const mergedPlan = { ...submission, ...plan };
-
-      // mapPlanToPayload erwartet weiterhin das deutsche Label (abwärtskompatibel)
-      const labelForPayload: LabelTyp = typ ?? TYPE_TO_LABEL[type];
-
+      const labelForPayload = typ ?? TYPE_TO_LABEL[type];
       const payload = mapPlanToPayload(mergedPlan, labelForPayload, overrides);
 
       const response = await fetch(
@@ -59,21 +85,8 @@ export default function SendToMakeButton({
       if (!response.ok) throw new Error("Fehler beim Senden");
 
       setMessage("✅ Erfolgreich an Make gesendet");
+      waitForPlanData(plan, type, setMessage); // NEU: Starte Polling
 
-      // OPTIONAL: last_run_at aktualisieren – jetzt konsistent per technischem Typ
-      /*
-      const table =
-        type === "month" ? "month_plans" :
-        type === "week"  ? "week_plans"  :
-                           "day_plans";
-
-      const { error } = await supabase
-        .from(table)
-        .update({ last_run_at: new Date().toISOString() })
-        .eq("id", plan.id);
-
-      if (error) console.error("❌ Fehler beim Aktualisieren von last_run_at:", error);
-      */
     } catch (err) {
       console.error(err);
       setMessage("❌ Fehler beim Senden");

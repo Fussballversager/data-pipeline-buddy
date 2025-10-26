@@ -267,52 +267,33 @@ export function TrainingForm() {
         </Select>
       </div>
 
-      <div>
-        <Label>Trainingsphilosophie</Label>
-        <Select
-          value={form.trainingsphilosophie}
-          onValueChange={(v) => handleChange("trainingsphilosophie", v)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Wählen..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="DFB">DFB-Trainingsphilosophie</SelectItem>
-            <SelectItem value="Horst Wein">Funino - Horst Wein</SelectItem>
-            <SelectItem value="Niederlande">Niederlandes Philosophie</SelectItem>
-            <SelectItem value="Spanien">Spaniens Philosophie</SelectItem>
-            <SelectItem value="Dribbler">Dribbler wie Jamal und Messi</SelectItem>
-            <SelectItem value="Quälix">Quälix wie Magath</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Variante 1: Statischer Block */}
       <div className="border rounded p-4 bg-gray-700 shadow-sm mt-4">
         <h3 className="text-lg font-bold text-gray-100 mb-2">Trainingsphilosophie</h3>
         <ul className="list-disc pl-6 space-y-1 text-gray-200">
           <li>
-            <b>DFB:</b> systematisch, Technik + Spielformen, klare Abläufe, strukturierte Spieleröffnung
+            <b>DFB:</b> systematische breite Ausbildung, Technik + Spielformen, klare Abläufe, strukturierte Spieleröffnung
           </li>
           <li>
-            <b>Horst Wein:</b> spielerisch, kleine Spielformen, Funino-Logik, Umschalten im Kleinen
+            <b>Horst Wein:</b> spielerisch, kleine Spielformen, Funino-Logik, Umschalten im Kleinen, intensives Lernen
           </li>
           <li>
-            <b>Niederlande:</b> Rondos, Spielfluss, Ballbesitz sichern, Umschalten variabel
+            <b>Niederlande:</b> Rondos, Spielfluss, Ballbesitz sichern, Umschalten variabel, viel Tempo
           </li>
           <li>
-            <b>Spanien:</b> Positionsspiel, Tiqui-Taca, Dreiecksbildung, sofortiges Gegenpressing nach Ballverlust
+            <b>Spanien:</b> Positionsspiel, Tiqui-Taca, Dreiecksbildung, sofortiges Gegenpressing nach Ballverlust, sehr gute Technik und Entscheidungsfähigkeit
           </li>
           <li>
-            <b>Dribbler:</b> 1v1, Kreativität, mutige Aktionen, freie Lösungen im Umschalten
+            <b>Dribbler:</b> 1v1, Kreativität, mutige Aktionen, viel individuelles Dribbeln, freie Lösungen im Umschalten
           </li>
           <li>
-            <b>Quälix:</b> Intensität, Kondition, Disziplin, klare Lauf- und Zweikampfvorgaben
+            <b>Quälix:</b> Hohe Intensität, Kondition, Disziplin, klare Lauf- und Zweikampfvorgaben
           </li>
         </ul>
       </div>
       <div>
-        <Label>Schwerpunkte</Label>
+        <Label>Schwachstellen</Label>
         <Textarea
           value={form.schwachstellen}
           onChange={(e) => handleChange("schwachstellen", e.target.value)}

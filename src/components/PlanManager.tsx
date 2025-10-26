@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import SendToMakeButton from "@/components/SendToMakeButton"; 
+import SendToMakeButton from "@/components/SendToMakeButton";
 import { mapPlanToPayload } from "../utils/mapPlanToPayload";
 
 export function PlanManager() {
@@ -11,21 +11,16 @@ export function PlanManager() {
   const [weekPlans, setWeekPlans] = useState<any[]>([]);
   const [dayPlans, setDayPlans] = useState<any[]>([]);
   const [submission, setSubmission] = useState<any | null>(null);
-
   const [newMonthYear, setNewMonthYear] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-
   const [tageProWoche, setTageProWoche] = useState<number>(3);
   const [einheitDauer, setEinheitDauer] = useState<number>(90);
   const [spielerkader, setSpielerkader] = useState<number>(18);
   const [torhueter, setTorhueter] = useState<number>(2);
-
-  // Overrides für Tests
   const [overridePhilosophie, setOverridePhilosophie] = useState<string | null>(null);
   const [overrideAltersstufe, setOverrideAltersstufe] = useState<string | null>(null);
   const [overrideSpielerkader, setOverrideSpielerkader] = useState<number | null>(null);
-
   const [lastPayload, setLastPayload] = useState<any | null>(null);
 
   useEffect(() => {
@@ -34,7 +29,6 @@ export function PlanManager() {
       if (!userData.user) return;
       const userId = userData.user.id;
 
-      // Stammdaten laden
       const { data: submissionData } = await supabase
         .from("taggy_submissions")
         .select("*")
@@ -49,21 +43,17 @@ export function PlanManager() {
 
       setSubmission({ ...submissionData, ...profileData });
 
-      // Monatspläne laden
       const { data: months } = await supabase
         .from("month_plans")
         .select("*")
         .eq("user_id", userId)
         .order("month_year", { ascending: true });
 
-      // Wochenpläne laden
       const { data: weeks } = await supabase
         .from("view_week_plans")
         .select("*")
-        .eq("user_id", userId)
-        .order("calendar_week", { ascending: true });
+        .eq("user_id", userId);
 
-      // Tagespläne laden
       const { data: days } = await supabase
         .from("day_plans")
         .select("*")
@@ -71,22 +61,31 @@ export function PlanManager() {
         .order("training_date", { ascending: true });
 
       setMonthPlans(months || []);
-      setWeekPlans(weeks || []);
+
+      const weeksSorted = [...(weeks || [])].sort((a, b) => {
+        const monthA = months?.find((m) => m.id === a.month_plan_id)?.month_year ?? "";
+        const monthB = months?.find((m) => m.id === b.month_plan_id)?.month_year ?? "";
+
+        if (monthA < monthB) return -1;
+        if (monthA > monthB) return 1;
+        return (a.calendar_week ?? 0) - (b.calendar_week ?? 0);
+      });
+
+      setWeekPlans(weeksSorted);
       setDayPlans(days || []);
     };
 
     loadPlans();
   }, []);
 
-  // Monatsplan anlegen
   const createMonthPlan = async () => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user || !newMonthYear) {
       setMessage("❌ Bitte Monat eingeben (YYYY-MM)");
       return;
     }
-    const userId = userData.user.id;
 
+    const userId = userData.user.id;
     setLoading(true);
     setMessage(null);
 
@@ -149,27 +148,21 @@ export function PlanManager() {
         <CardTitle>Plan Manager</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8 text-sm">
-
         {/* Monatspläne */}
         <div>
           <h3 className="font-medium mb-2">Monatspläne</h3>
           <ul className="space-y-2">
             {monthPlans.map((p) => (
-              <li
-                key={p.id}
-                className={`flex justify-between items-center border rounded p-3 shadow-sm
-                  ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}
-              >
+              <li key={p.id} className={`flex justify-between items-center border rounded p-3 shadow-sm ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}>
                 <div className="flex flex-col text-sm">
                   <span className="font-medium">
                     {p.month_year}: {p.fokus || "–"} – {p.schwachstellen || "–"}
                   </span>
                   <span>
-                    Kader: {p.spielerkader ?? "–"} | TW: {p.torhueter ?? "–"} |{" "}
-                    {p.tage_pro_woche ?? "–"}x/Woche | {p.einheit_dauer ?? "–"} Min{" "}
+                    Kader: {p.spielerkader ?? "–"} | TW: {p.torhueter ?? "–"} | {p.tage_pro_woche ?? "–"}x/Woche | {p.einheit_dauer ?? "–"} Min
                     {p.last_run_at && (
                       <span className="text-green-400 font-medium">
-                        – KI genutzt am {new Date(p.last_run_at).toLocaleDateString()}
+                        {' '}– KI genutzt am {new Date(p.last_run_at).toLocaleDateString()}
                       </span>
                     )}
                   </span>
@@ -178,12 +171,9 @@ export function PlanManager() {
                   <SendToMakeButton
                     plan={p}
                     typ="Monat"
+                    type="month"
                     submission={submission}
-                    overrides={{
-                      overridePhilosophie,
-                      overrideAltersstufe,
-                      overrideSpielerkader,
-                    }}
+                    overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
                   />
                 )}
               </li>
@@ -196,11 +186,7 @@ export function PlanManager() {
               value={newMonthYear}
               onChange={(e) => setNewMonthYear(e.target.value)}
             />
-            <Button
-              onClick={createMonthPlan}
-              disabled={loading}
-              className="bg-green-600 text-white"
-            >
+            <Button onClick={createMonthPlan} disabled={loading} className="bg-green-600 text-white">
               {loading ? "Sende..." : "Neuen Monat anlegen"}
             </Button>
           </div>
@@ -214,11 +200,7 @@ export function PlanManager() {
             {weekPlans.map((p) => {
               const monthYear = monthPlans.find((m) => m.id === p.month_plan_id)?.month_year;
               return (
-                <li
-                  key={p.id}
-                  className={`flex justify-between items-center border rounded p-3 shadow-sm
-                    ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}
-                >
+                <li key={p.id} className={`flex justify-between items-center border rounded p-3 shadow-sm ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}>
                   <div className="flex flex-col max-w-[70%]">
                     <span className="font-medium truncate">
                       {monthYear ?? "?"} – KW {p.calendar_week ?? "?"}: {p.trainingsziel || "kein Ziel"}
@@ -233,12 +215,9 @@ export function PlanManager() {
                     <SendToMakeButton
                       plan={{ ...p, month_year: monthYear }}
                       typ="Woche"
+                      type="week"
                       submission={submission}
-                      overrides={{
-                        overridePhilosophie,
-                        overrideAltersstufe,
-                        overrideSpielerkader,
-                      }}
+                      overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
                     />
                   )}
                 </li>
@@ -252,11 +231,7 @@ export function PlanManager() {
           <h3 className="font-medium mb-2">Tagespläne</h3>
           <ul className="space-y-2">
             {dayPlans.map((p) => (
-              <li
-                key={p.id}
-                className={`flex justify-between items-center border rounded p-3 shadow-sm
-                  ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}
-              >
+              <li key={p.id} className={`flex justify-between items-center border rounded p-3 shadow-sm ${p.last_run_at ? "bg-gray-600" : "bg-gray-700"} text-gray-100`}>
                 <div className="flex flex-col max-w-[70%]">
                   <span className="font-medium truncate">
                     {p.training_date} – Ziel: {p.trainingsziel?.slice(0, 40) || "kein Ziel"}
@@ -271,12 +246,9 @@ export function PlanManager() {
                   <SendToMakeButton
                     plan={p}
                     typ="Tag"
+                    type="day"
                     submission={submission}
-                    overrides={{
-                      overridePhilosophie,
-                      overrideAltersstufe,
-                      overrideSpielerkader,
-                    }}
+                    overrides={{ overridePhilosophie, overrideAltersstufe, overrideSpielerkader }}
                   />
                 )}
               </li>
@@ -284,7 +256,6 @@ export function PlanManager() {
           </ul>
         </div>
 
-        {/* Debug Payload */}
         {lastPayload && (
           <div className="mt-6">
             <h4 className="font-medium">Letztes gesendetes Payload</h4>
