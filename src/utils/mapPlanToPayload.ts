@@ -22,7 +22,9 @@ export function mapPlanToPayload(
     einheit_dauer: plan.einheit_dauer,
     torhueter: plan.torhueter,
     tage_pro_woche: plan.tage_pro_woche,
-    user_id: plan.user_id,
+    user_id: plan.user_id,  
+    anzahl_monate: plan.anzahl_monate,
+
   };
 
   switch (typ) {
