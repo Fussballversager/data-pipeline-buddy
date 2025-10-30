@@ -113,15 +113,15 @@ const App = () => (
         }
       />
 
-      <Route
+  {/*     <Route
         path="/plans/:type/:id"
-        element={
-          <AuthWrapper>
-            <PlanViewer />
+         element={
+           <AuthWrapper>
+             <PlanViewer />
           </AuthWrapper>
-        }
-      />
-
+         }
+     />
+*/}
       <Route path="/plans/day/:id" element={<DayPlanPage />} />
 
       <Route path="/months" element={<MonthOverview />} />

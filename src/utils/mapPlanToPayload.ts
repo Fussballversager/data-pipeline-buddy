@@ -24,6 +24,7 @@ export function mapPlanToPayload(
     tage_pro_woche: plan.tage_pro_woche,
     user_id: plan.user_id,  
     anzahl_monate: plan.anzahl_monate,
+    anzahl_abschnitte: plan.anzahl_abschnitte,
 
   };
 

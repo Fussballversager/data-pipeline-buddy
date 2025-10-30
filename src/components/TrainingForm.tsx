@@ -16,6 +16,7 @@ export function TrainingForm() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState<any>({
     altersstufe: "",
@@ -34,13 +35,12 @@ export function TrainingForm() {
     notizen: "",
   });
 
-  // User-ID laden & vorhandene Trainingsdaten holen
+  // 🧠 User & vorhandene Daten laden
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         setUserId(data.user.id);
 
-        // 1. Trainingsdaten laden
         const { data: submission, error } = await supabase
           .from("taggy_submissions")
           .select("*")
@@ -49,7 +49,6 @@ export function TrainingForm() {
           .single();
 
         if (!error && submission) {
-          // Trainingsdaten vorhanden → Formular damit füllen
           setForm({
             altersstufe: submission.altersstufe ?? "",
             spielerkader: submission.spielerkader ?? "",
@@ -67,7 +66,7 @@ export function TrainingForm() {
             notizen: submission.notizen ?? "",
           });
         } else {
-          // Noch keine Trainingsdaten → Stammdaten holen
+          // 🪄 Backup: Stammdaten holen
           const { data: profile } = await supabase
             .from("user_profiles")
             .select("altersstufe, spieleranzahl")
@@ -87,13 +86,64 @@ export function TrainingForm() {
     });
   }, []);
 
+  // 🧩 Hilfsfunktion: Zahl clampen
+  const clampNumber = (val: string, min: number, max?: number) => {
+    const num = parseInt(val, 10);
+    if (isNaN(num)) return "";
+    if (max !== undefined) return Math.min(Math.max(num, min), max);
+    return Math.max(num, min);
+  };
+
   const handleChange = (field: string, value: string) => {
-    setForm({ ...form, [field]: value });
+    let safeValue = value;
+
+    if (["spielerkader", "torhueter", "tage_pro_woche", "einheit_dauer"].includes(field)) {
+      if (value === "") {
+        safeValue = "";
+      } else {
+        switch (field) {
+          case "spielerkader":
+            safeValue = String(clampNumber(value, 1));
+            break;
+          case "torhueter":
+            safeValue = String(clampNumber(value, 0));
+            break;
+          case "tage_pro_woche":
+            safeValue = String(clampNumber(value, 1, 7));
+            break;
+          case "einheit_dauer":
+            safeValue = String(clampNumber(value, 1));
+            break;
+        }
+      }
+    }
+
+    setForm({ ...form, [field]: safeValue });
+    setError(null);
   };
 
   const handleSave = async () => {
     if (!userId) {
       setMessage("❌ Kein eingeloggter User gefunden.");
+      return;
+    }
+
+    // ✅ Validierung vor dem Speichern
+    const numFields = {
+      spielerkader: parseInt(form.spielerkader, 10),
+      torhueter: parseInt(form.torhueter, 10),
+      tage_pro_woche: parseInt(form.tage_pro_woche, 10),
+      einheit_dauer: parseInt(form.einheit_dauer, 10),
+    };
+
+    if (
+      numFields.spielerkader < 1 ||
+      numFields.torhueter < 0 ||
+      numFields.tage_pro_woche < 1 ||
+      numFields.tage_pro_woche > 7 ||
+      numFields.einheit_dauer < 1
+    ) {
+      setError("Bitte gültige positive Zahlen eingeben.");
       return;
     }
 
@@ -105,17 +155,11 @@ export function TrainingForm() {
         {
           user_id: userId,
           altersstufe: form.altersstufe,
-          spielerkader: form.spielerkader
-            ? parseInt(form.spielerkader, 10)
-            : null,
-          torhueter: form.torhueter ? parseInt(form.torhueter, 10) : null,
-          tage_pro_woche: form.tage_pro_woche
-            ? parseInt(form.tage_pro_woche, 10)
-            : null,
-          einheit_dauer: form.einheit_dauer
-            ? parseInt(form.einheit_dauer, 10)
-            : null,
-          plan_typ: "Monat", // immer fest
+          spielerkader: numFields.spielerkader,
+          torhueter: numFields.torhueter,
+          tage_pro_woche: numFields.tage_pro_woche,
+          einheit_dauer: numFields.einheit_dauer,
+          plan_typ: "Monat",
           saisonphase: form.saisonphase,
           saisonziel: form.saisonziel,
           spielidee: form.spielidee,
@@ -127,14 +171,18 @@ export function TrainingForm() {
           notizen: form.notizen,
         },
       ],
-      { onConflict: "user_id" } // überschreibt statt neu
+      { onConflict: "user_id" }
     );
 
     setLoading(false);
 
     if (error) {
       console.error(error);
-      setMessage("❌ Fehler beim Speichern: " + error.message);
+      if ((error as any).code === "23514") {
+        setMessage("❌ Ungültige Eingabe – bitte nur positive Zahlen eingeben.");
+      } else {
+        setMessage("❌ Fehler beim Speichern: " + error.message);
+      }
     } else {
       setMessage("✅ Daten gespeichert!");
     }
@@ -144,6 +192,7 @@ export function TrainingForm() {
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       <h2 className="text-xl font-bold">Trainingsdaten</h2>
 
+      {/* 🧱 Eingaben */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Altersstufe</Label>
@@ -152,34 +201,43 @@ export function TrainingForm() {
             onChange={(e) => handleChange("altersstufe", e.target.value)}
           />
         </div>
+
         <div>
           <Label>Spielerkader</Label>
           <Input
             type="number"
+            min={1}
             value={form.spielerkader}
             onChange={(e) => handleChange("spielerkader", e.target.value)}
           />
         </div>
+
         <div>
           <Label>Torhüter</Label>
           <Input
             type="number"
+            min={0}
             value={form.torhueter}
             onChange={(e) => handleChange("torhueter", e.target.value)}
           />
         </div>
+
         <div>
           <Label>Einheiten pro Woche</Label>
           <Input
             type="number"
+            min={1}
+            max={7}
             value={form.tage_pro_woche}
             onChange={(e) => handleChange("tage_pro_woche", e.target.value)}
           />
         </div>
+
         <div>
           <Label>Einheitsdauer (Minuten)</Label>
           <Input
             type="number"
+            min={1}
             value={form.einheit_dauer}
             onChange={(e) => handleChange("einheit_dauer", e.target.value)}
           />
@@ -203,7 +261,6 @@ export function TrainingForm() {
           </Select>
         </div>
       </div>
-
       <div>
         <Label>Saisonziel</Label>
         <Input
@@ -239,7 +296,6 @@ export function TrainingForm() {
           </SelectContent>
         </Select>
       </div>
-
       <div>
         <Label>Fokus</Label>
         <Input
@@ -266,8 +322,9 @@ export function TrainingForm() {
           </SelectContent>
         </Select>
       </div>
-
-
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {/* Rest unverändert */}
+      {/* Saisonphase, Ziel, Spielidee etc... */}
       {/* Variante 1: Statischer Block */}
       <div className="border rounded p-4 bg-gray-700 shadow-sm mt-4">
         <h3 className="text-lg font-bold text-gray-100 mb-2">Trainingsphilosophie</h3>
@@ -313,11 +370,9 @@ export function TrainingForm() {
           onChange={(e) => handleChange("notizen", e.target.value)}
         />
       </div>
-
       <Button onClick={handleSave} disabled={loading}>
         {loading ? "Speichern..." : "Speichern"}
       </Button>
-
       {message && <p className="mt-2">{message}</p>}
     </div>
   );

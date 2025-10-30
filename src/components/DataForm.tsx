@@ -16,35 +16,49 @@ export function DataForm() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // User-ID laden & Stammdaten holen
+  // 🧠 User laden + vorhandene Stammdaten holen
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
-      if (data.user) {
-        setUserId(data.user.id);
+      if (!data.user) return;
+      setUserId(data.user.id);
 
-        const { data: profile, error } = await supabase
-          .from("user_profiles")
-          .select("*")
-          .eq("user_id", data.user.id)
-          .limit(1)
-          .single();
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("user_id", data.user.id)
+        .limit(1)
+        .single();
 
-        if (!error && profile) {
-          setForm({
-            name: profile.display_name ?? "",
-            verein: profile.verein ?? "",
-            team: profile.team ?? "",
-            altersstufe: profile.altersstufe ?? "",
-            spieleranzahl: profile.spieleranzahl ?? "",
-          });
-        }
+      if (profile) {
+        setForm({
+          name: profile.display_name ?? "",
+          verein: profile.verein ?? "",
+          team: profile.team ?? "",
+          altersstufe: profile.altersstufe ?? "",
+          spieleranzahl: profile.spieleranzahl?.toString() ?? "",
+        });
       }
     });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "spieleranzahl") {
+      const num = parseInt(value, 10);
+      // Eingabe korrigieren & validieren
+      if (isNaN(num) || num < 1) {
+        setError("Bitte eine gültige Spieleranzahl (mind. 1) eingeben.");
+        setForm({ ...form, spieleranzahl: value });
+      } else {
+        setError(null);
+        setForm({ ...form, spieleranzahl: String(num) });
+      }
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSave = async () => {
@@ -53,19 +67,24 @@ export function DataForm() {
       return;
     }
 
+    // Letzter Schutz vor dem Speichern
+    const num = parseInt(form.spieleranzahl, 10);
+    if (isNaN(num) || num < 1) {
+      setError("Spieleranzahl muss mindestens 1 betragen.");
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
     const { error } = await supabase.from("user_profiles").upsert([
       {
-        user_id: userId, // 🔑 wichtig für RLS
+        user_id: userId,
         display_name: form.name,
         verein: form.verein,
         team: form.team,
         altersstufe: form.altersstufe,
-        spieleranzahl: form.spieleranzahl
-          ? parseInt(form.spieleranzahl, 10)
-          : null,
+        spieleranzahl: num,
       },
     ]);
 
@@ -73,7 +92,11 @@ export function DataForm() {
 
     if (error) {
       console.error(error);
-      setMessage("❌ Fehler beim Speichern: " + error.message);
+      if ((error as any).code === "23514") {
+        setMessage("❌ Ungültige Eingabe – Spieleranzahl muss positiv sein.");
+      } else {
+        setMessage("❌ Fehler beim Speichern: " + error.message);
+      }
     } else {
       setMessage("✅ Stammdaten gespeichert!");
     }
@@ -85,29 +108,17 @@ export function DataForm() {
 
       <div>
         <Label>Trainer</Label>
-        <Input
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-        />
+        <Input name="name" value={form.name} onChange={handleChange} />
       </div>
 
       <div>
         <Label>Verein</Label>
-        <Input
-          name="verein"
-          value={form.verein}
-          onChange={handleChange}
-        />
+        <Input name="verein" value={form.verein} onChange={handleChange} />
       </div>
 
       <div>
         <Label>Team</Label>
-        <Input
-          name="team"
-          value={form.team}
-          onChange={handleChange}
-        />
+        <Input name="team" value={form.team} onChange={handleChange} />
       </div>
 
       <div>
@@ -122,11 +133,14 @@ export function DataForm() {
       <div>
         <Label>Spielerkader</Label>
         <Input
-          name="spieleranzahl"
           type="number"
+          name="spieleranzahl"
+          min={1}
+          step={1}
           value={form.spieleranzahl}
           onChange={handleChange}
         />
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
       </div>
 
       <Button onClick={handleSave} disabled={loading}>

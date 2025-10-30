@@ -1,3 +1,5 @@
+// 🧩 Deprecated – PlanViewer wird aktuell nicht mehr verwendet (Stand: Okt 2025)
+
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
