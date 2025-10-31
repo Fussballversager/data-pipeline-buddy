@@ -141,6 +141,13 @@ export function PlanManager() {
     const stammdaten = submission?.submissionData ?? {};
     const profil = submission?.profileData ?? {};
 
+console.log("🧩 Herkunft Spielerkader:");
+console.log("overrideSpielerkader =", overrideSpielerkader);
+console.log("profileData.spielerkader =", profil?.spielerkader);
+console.log("submissionData.spielerkader =", stammdaten?.spielerkader);
+console.log("default (State) =", spielerkader);
+
+
     const payload = mapPlanToPayload(
       {
         ...stammdaten,
@@ -159,6 +166,10 @@ export function PlanManager() {
       "Monat",
       { overridePhilosophie, overrideAltersstufe, overrideSpielerkader }
     );
+
+
+    console.log("📦 payload.spielerkader:", payload.spielerkader);
+
 
     setLastPayload(payload);
 
@@ -356,14 +367,14 @@ export function PlanManager() {
 
         {/* Debug / Letztes Payload */}
 
-        {/* lastPayload && (
+        {lastPayload && (
           <div className="mt-6">
             <h4 className="font-medium">Letztes gesendetes Payload</h4>
             <pre className="bg-gray-500 p-3 text-xs rounded overflow-x-auto whitespace-pre-wrap">
               {JSON.stringify(lastPayload, null, 2)}
             </pre>
           </div>
-        )*/}
+        )}
 
       </CardContent>
     </Card>

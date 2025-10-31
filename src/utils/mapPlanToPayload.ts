@@ -5,12 +5,18 @@ export function mapPlanToPayload(
     overridePhilosophie?: string | null;
     overrideAltersstufe?: string | null;
     overrideSpielerkader?: number | null;
-  }
-) {
+  },
+  submission?: any // ✅ neu
+)
+
+{
   const stammdaten = {
     altersstufe: overrides?.overrideAltersstufe || plan.altersstufe,
     trainingsphilosophie: overrides?.overridePhilosophie || plan.trainingsphilosophie,
-    spielerkader: overrides?.overrideSpielerkader || plan.spielerkader,
+spielerkader:
+  overrides?.overrideSpielerkader ??
+  submission?.submissionData?.spielerkader ??
+  plan.spielerkader,
     saisonsziel: plan.saisonziel,
     spielidee: plan.spielidee,
     match_formation: plan.match_formation,

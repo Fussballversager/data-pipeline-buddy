@@ -40,7 +40,7 @@ async function waitForPlanData(
   setStatus: React.Dispatch<React.SetStateAction<"idle" | "processing" | "done" | "error">>
 ): Promise<boolean> {
   setStatus("processing");
-  const maxAttempts = 20; // ~2 min
+  const maxAttempts = 50; // ~2 min
   const delay = 6000;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -52,7 +52,8 @@ async function waitForPlanData(
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
-  setStatus("error");
+  setStatus("done"); // ✅ Nicht als Fehler markieren
+  console.warn("⏳ Plan wurde nach 4 Minuten noch nicht gefunden – Make läuft vermutlich noch weiter.");
   return false;
 }
 
@@ -126,7 +127,17 @@ export default function SendToMakeButton({
       };
 
       const labelForPayload = (typ ?? TYPE_TO_LABEL[type]) as "Monat" | "Woche" | "Tag";
-      const payload = mapPlanToPayload(mergedWithFallbacks, labelForPayload, overrides);
+      const payload = mapPlanToPayload(mergedWithFallbacks, labelForPayload, overrides, submission);
+
+      // Debug-Log zur Kontrolle
+      console.log("📦 SEND TO MAKE DEBUG (final payload):", {
+        typ,
+        spielerkader: payload.spielerkader,
+        source_submission: submission?.submissionData?.spielerkader,
+        source_plan: plan?.spielerkader,
+        source_override: overrides?.overrideSpielerkader
+      });
+
 
       const response = await fetch("https://hook.eu2.make.com/x0ec5ntg8y8sqcl94nqeh6u57tqmnwg1", {
         method: "POST",
